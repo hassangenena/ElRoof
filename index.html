@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ElRoof</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Manrope:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode:"class",
+  theme:{extend:{
+    colors:{
+      "primary":"#e6d4a8","on-primary":"#3a2f10","primary-container":"#c9b88e",
+      "on-primary-container":"#544827","primary-fixed":"#f4e1b4","primary-fixed-dim":"#d7c59a",
+      "on-primary-fixed":"#231a01","on-primary-fixed-variant":"#514625",
+      "secondary":"#ffb596","on-secondary":"#581e00","secondary-container":"#76320f",
+      "on-secondary-container":"#fd9d71","secondary-fixed":"#ffdbcd","secondary-fixed-dim":"#ffb596",
+      "tertiary":"#85e4e4","on-tertiary":"#003737","tertiary-container":"#68c8c8",
+      "tertiary-fixed":"#93f2f2","tertiary-fixed-dim":"#76d6d5","on-tertiary-fixed":"#002020",
+      "on-tertiary-fixed-variant":"#004f4f","on-tertiary-container":"#005252",
+      "background":"#131313","on-background":"#e5e2e1","surface":"#131313","on-surface":"#e5e2e1",
+      "surface-variant":"#353535","on-surface-variant":"#cdc6b8","surface-dim":"#131313",
+      "surface-bright":"#393939","surface-container-lowest":"#0e0e0e","surface-container-low":"#1b1b1c",
+      "surface-container":"#202020","surface-container-high":"#2a2a2a","surface-container-highest":"#353535",
+      "surface-tint":"#d7c59a","inverse-surface":"#e5e2e1","inverse-on-surface":"#303030",
+      "inverse-primary":"#6a5d3a","outline":"#979083","outline-variant":"#4b463c",
+      "error":"#ffb4ab","on-error":"#690005","error-container":"#93000a","on-error-container":"#ffdad6",
+    },
+    borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},
+    spacing:{
+      "xl":"80px","margin-mobile":"20px","base":"8px","xs":"4px",
+      "margin-desktop":"64px","lg":"48px","gutter":"24px","sm":"12px","md":"24px"
+    },
+    fontFamily:{
+      "label-sm":["JetBrains Mono"],"headline-md":["Syne"],"headline-lg":["Syne"],
+      "display-lg":["Syne"],"body-lg":["Manrope"],"body-md":["Manrope"],"headline-lg-mobile":["Syne"]
+    },
+    fontSize:{
+      "label-sm":["12px",{lineHeight:"1.5",letterSpacing:"0.05em",fontWeight:"500"}],
+      "headline-md":["24px",{lineHeight:"1.3",fontWeight:"600"}],
+      "headline-lg":["40px",{lineHeight:"1.2",fontWeight:"700"}],
+      "display-lg":["64px",{lineHeight:"1.1",letterSpacing:"-0.02em",fontWeight:"800"}],
+      "body-lg":["18px",{lineHeight:"1.6",fontWeight:"400"}],
+      "body-md":["16px",{lineHeight:"1.6",fontWeight:"400"}],
+      "headline-lg-mobile":["32px",{lineHeight:"1.2",fontWeight:"700"}]
+    }
+  }}
+}
+</script>
+<style>
+body{min-height:max(884px,100dvh);background:#131313;color:#e5e2e1;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
+.screen{display:none;}
+.screen.active{display:flex;}
+#hubScreen.active,#loginScreen.active{display:flex;}
+#pantryScreen.active,#arrivalsScreen.active,#broadcastsScreen.active{display:block;}
+
+/* Pattern overlay */
+.pattern-overlay{position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l2.5 12.5L45 15l-12.5 2.5L30 30l-2.5-12.5L15 15l12.5-2.5z' fill='%23e6d4a8' fill-opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+
+/* Loader */
+#loader{position:fixed;inset:0;background:#131313;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .7s;}
+#loader.gone{opacity:0;pointer-events:none;}
+.loader-roof{width:90px;height:64px;background:#c9b88e;border-radius:3px;position:relative;box-shadow:7px 7px 0 #8a7048,0 24px 50px rgba(0,0,0,.6);animation:lb 1.6s ease infinite;}
+.loader-roof::before{content:'';position:absolute;inset:8px;border:1.5px dashed rgba(160,128,80,.3);border-radius:2px;}
+@keyframes lb{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+
+/* Entrance animation */
+.entrance-sweep{animation:sweep .8s cubic-bezier(.16,1,.3,1) forwards;}
+@keyframes sweep{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* Arched top cards */
+.arched-top{border-top-left-radius:200px;border-top-right-radius:200px;}
+
+/* Dot divider */
+.dot-divider{display:flex;align-items:center;width:100%;margin:20px 0;}
+.dot-divider::before,.dot-divider::after{content:'';flex:1;height:1px;background:rgba(201,184,142,.2);}
+.dot-divider-star{margin:0 14px;color:#e6d4a8;font-size:13px;}
+
+/* Toggle switch */
+.toggle-wrap{position:relative;display:inline-block;}
+.toggle-input{position:absolute;opacity:0;width:0;height:0;}
+.toggle-track{width:72px;height:36px;background:#2a2a2a;border-radius:999px;cursor:pointer;transition:all .4s ease;border:1px solid rgba(230,212,168,.2);display:block;position:relative;}
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:28px;height:28px;background:#e6d4a8;border-radius:50%;transition:all .4s cubic-bezier(.68,-.55,.265,1.55);box-shadow:0 0 12px rgba(230,212,168,.3);}
+.toggle-input:checked+.toggle-track{background:#544827;}
+.toggle-input:checked+.toggle-track::after{left:40px;background:#131313;}
+
+/* Time modal */
+.time-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.time-modal-bg.open{opacity:1;pointer-events:all;}
+.time-modal-sheet{width:100%;max-width:480px;background:#2a2a2a;border-top-left-radius:24px;border-top-right-radius:24px;padding:1.5rem 1.5rem 2.5rem;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);border-top:1px solid rgba(230,212,168,.15);}
+.time-modal-sheet::before{content:'';display:block;width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 1.4rem;}
+.time-modal-bg.open .time-modal-sheet{transform:translateY(0);}
+.time-btn{padding:12px 4px;background:rgba(255,255,255,.06);border:1px solid rgba(201,184,142,.18);border-radius:8px;color:#cdc6b8;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;text-align:center;transition:all .13s;min-height:44px;}
+.time-btn:active,.time-btn.sel{background:rgba(230,212,168,.18);border-color:#e6d4a8;color:#e6d4a8;font-weight:700;}
+
+/* Toast */
+.toast{position:fixed;bottom:6rem;left:50%;transform:translateX(-50%) translateY(70px);background:#202020;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e5e2e1;z-index:600;transition:transform .32s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.5);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.green{border-color:rgba(100,200,130,.3);}
+.toast.gold{border-color:rgba(230,212,168,.3);}
+
+/* Signal line for broadcasts */
+.signal-line{position:absolute;left:16px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#e6d4a8 0%,transparent 100%);opacity:.15;}
+
+/* Member card for arrivals */
+.member-row{border:1px solid rgba(201,184,142,.12);transition:transform .2s,border-color .2s;}
+.member-row:active{transform:scale(.98);}
+.member-row.here{border-color:rgba(201,184,142,.25);}
+</style>
+</head>
+<body class="dark font-body-md">
+
+<div class="pattern-overlay"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-roof"></div>
+  <p class="mt-8 font-label-sm text-label-sm text-primary/40 uppercase tracking-[.4em]">ElRoof</p>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════
+     LOGIN SCREEN
+════════════════════════════ -->
+<div id="loginScreen" class="screen flex-col items-center justify-center min-h-screen px-5 py-10 relative z-10">
+  <div class="w-full max-w-sm entrance-sweep">
+    <!-- Logo -->
+    <div class="text-center mb-10">
+      <h1 class="font-display-lg text-display-lg text-primary" style="font-family:Syne;letter-spacing:-3px;">ElRoof</h1>
+      <p class="font-label-sm text-label-sm text-outline uppercase tracking-[.3em] mt-1">Who's going up today?</p>
+    </div>
+    <!-- Arched card -->
+    <div class="arched-top bg-surface-container-low border border-primary/10 p-6 pt-10 relative overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-24 bg-primary/10 blur-3xl rounded-full"></div>
+      <p class="font-label-sm text-label-sm text-outline uppercase tracking-[.2em] mb-4 relative z-10">Choose your name</p>
+      <div class="grid grid-cols-3 gap-2 mb-6 relative z-10" id="loginGrid"></div>
+      <button id="loginBtn" onclick="doLogin()" disabled
+        class="w-full py-4 font-headline-md text-body-md font-bold bg-primary text-on-primary rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(230,212,168,.15)] relative z-10">
+        ↑ Head Up
+      </button>
+      <p class="text-center font-label-sm text-label-sm text-error mt-3 h-4 relative z-10" id="lerr"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     HUB SCREEN
+════════════════════════════ -->
+<div id="hubScreen" class="screen flex-col min-h-screen relative z-10">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
+    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center font-label-sm text-label-sm font-bold text-on-primary" id="hubAvatar">—</div>
+    <h1 class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</h1>
+    <button class="text-primary" onclick="showTab('hub')"><span class="material-symbols-outlined">sensors</span></button>
+  </header>
+
+  <!-- Rooftop canvas -->
+  <main class="flex-grow flex flex-col items-center justify-center px-4 pb-32 entrance-sweep">
+    <div class="relative w-[88vw] max-w-sm aspect-square bg-surface-container-high rounded-full border border-primary/10 shadow-2xl overflow-hidden" id="rooftopCanvas">
+      <div class="absolute inset-0 opacity-30" style="background-image:url('https://www.transparenttextures.com/patterns/stardust.png');mix-blend-mode:overlay;"></div>
+
+      <!-- Zone: Broadcasts (top) -->
+      <button class="group absolute top-[12%] left-1/2 -translate-x-1/2 flex flex-col items-center z-20" onclick="showTab('broadcasts')">
+        <div class="w-20 h-20 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 group-active:border-primary transition-all duration-300">
+          <span class="material-symbols-outlined text-primary text-3xl">podcasts</span>
+        </div>
+        <span class="mt-2 font-label-sm text-label-sm text-primary tracking-widest uppercase">Broadcasts</span>
+      </button>
+
+      <!-- Zone: Arrivals (bottom-left) -->
+      <button class="group absolute bottom-[22%] left-[10%] flex flex-col items-center z-20" onclick="showTab('arrivals')">
+        <div class="w-20 h-20 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 group-active:border-primary transition-all duration-300">
+          <span class="material-symbols-outlined text-primary text-3xl">flight_land</span>
+        </div>
+        <span class="mt-2 font-label-sm text-label-sm text-primary tracking-widest uppercase">Arrivals</span>
+      </button>
+
+      <!-- Zone: Pantry (bottom-right) -->
+      <button class="group absolute bottom-[22%] right-[10%] flex flex-col items-center z-20" onclick="showTab('pantry')">
+        <div class="w-20 h-20 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 group-active:border-primary transition-all duration-300">
+          <span class="material-symbols-outlined text-primary text-3xl">kitchen</span>
+        </div>
+        <span class="mt-2 font-label-sm text-label-sm text-primary tracking-widest uppercase">Pantry</span>
+      </button>
+
+      <!-- Core -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border border-primary/10 rounded-full flex items-center justify-center">
+        <div class="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center border border-primary/10 animate-pulse">
+          <span class="font-display-lg text-primary/40 text-xl font-bold" id="hubCount">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="mt-6 text-center">
+      <p class="font-label-sm text-label-sm text-outline uppercase tracking-[.2em]" id="hubDateLabel">—</p>
+      <p class="font-body-md text-on-surface-variant text-sm mt-1" id="hubSubtitle">Loading…</p>
+    </div>
+  </main>
+</div>
+
+<!-- ════════════════════════════
+     PANTRY SCREEN
+════════════════════════════ -->
+<div id="pantryScreen" class="screen min-h-screen relative z-10">
+  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
+    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
+      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
+      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+    </button>
+    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
+    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center font-label-sm text-label-sm font-bold text-on-primary" id="pantryAvatar">—</div>
+  </header>
+  <main class="relative z-10 px-5 pt-8 pb-32 max-w-lg mx-auto entrance-sweep">
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">kitchen</span>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">The Pantry</h1>
+      </div>
+      <p class="font-body-md text-on-surface-variant text-sm">Tap any item to toggle availability.</p>
+    </div>
+    <section class="arched-top bg-surface-container-low p-6 pt-16 border border-primary/10 relative overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-28 bg-primary/8 blur-3xl rounded-full"></div>
+      <div class="space-y-6 relative z-10" id="pantryList"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ════════════════════════════
+     ARRIVALS SCREEN
+════════════════════════════ -->
+<div id="arrivalsScreen" class="screen min-h-screen relative z-10">
+  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
+    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
+      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
+      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+    </button>
+    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
+    <span class="material-symbols-outlined text-primary">sensors</span>
+  </header>
+  <main class="relative z-10 px-5 pt-8 pb-32 max-w-md mx-auto entrance-sweep">
+    <section class="mb-8 text-center">
+      <div class="font-display-lg text-display-lg text-primary mb-1" id="arrivalCount">0/9</div>
+      <div class="font-label-sm text-label-sm text-outline tracking-[.2em] uppercase">Total Presence</div>
+      <div class="dot-divider"><span class="material-symbols-outlined dot-divider-star text-sm">grade</span></div>
+    </section>
+    <section class="space-y-4" id="arrivalsList"></section>
+  </main>
+</div>
+
+<!-- ════════════════════════════
+     BROADCASTS SCREEN
+════════════════════════════ -->
+<div id="broadcastsScreen" class="screen min-h-screen relative z-10">
+  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
+    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
+      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
+      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+    </button>
+    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
+    <span class="material-symbols-outlined text-primary">sensors</span>
+  </header>
+  <main class="relative z-10 px-5 pt-8 pb-40 max-w-2xl mx-auto entrance-sweep">
+    <header class="mb-8">
+      <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-1">Broadcasts</h1>
+      <p class="text-on-surface-variant text-sm">Today's message from the roof.</p>
+    </header>
+    <!-- Broadcasts list -->
+    <div id="broadcastDisplay" class="space-y-0"></div>
+  </main>
+  <!-- Compose area -->
+  <section class="fixed bottom-[72px] left-0 w-full px-4 z-40">
+    <div class="max-w-2xl mx-auto bg-surface-container-low border border-x border-t border-primary/20 arched-top px-5 pt-8 pb-4 shadow-2xl backdrop-blur-xl">
+      <div class="flex items-center gap-3 mb-3">
+        <span class="material-symbols-outlined text-primary text-lg">stylus</span>
+        <p class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Initiate Signal</p>
+      </div>
+      <div class="relative">
+        <input id="bInput" type="text" placeholder="Transcribe your message…"
+          class="w-full bg-transparent border-0 border-b-2 border-primary/30 py-3 text-on-surface placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-500 font-body-md text-body-md"/>
+        <button onclick="sendBroadcast()" class="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-primary active:scale-90 transition-transform">
+          <span class="material-symbols-outlined text-3xl">send</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════════
+     BOTTOM NAV (shown on all main screens)
+════════════════════════════ -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface/90 backdrop-blur-xl rounded-t-xl border-t border-primary/10" id="bottomNav" style="display:none;">
+  <button onclick="showTab('hub')" id="nav-hub" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[52px]">
+    <span class="material-symbols-outlined">grid_view</span>
+    <span class="font-label-sm text-label-sm mt-1">Hub</span>
+  </button>
+  <button onclick="showTab('pantry')" id="nav-pantry" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[52px]">
+    <span class="material-symbols-outlined">kitchen</span>
+    <span class="font-label-sm text-label-sm mt-1">Pantry</span>
+  </button>
+  <button onclick="showTab('arrivals')" id="nav-arrivals" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[52px]">
+    <span class="material-symbols-outlined">flight_land</span>
+    <span class="font-label-sm text-label-sm mt-1">Arrivals</span>
+  </button>
+  <button onclick="showTab('broadcasts')" id="nav-broadcasts" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[52px]">
+    <span class="material-symbols-outlined">podcasts</span>
+    <span class="font-label-sm text-label-sm mt-1">Broadcasts</span>
+  </button>
+  <button onclick="doLogout()" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[52px] active:text-error">
+    <span class="material-symbols-outlined">logout</span>
+    <span class="font-label-sm text-label-sm mt-1">Leave</span>
+  </button>
+</nav>
+
+<!-- ════════════════════════════
+     TIME MODAL
+════════════════════════════ -->
+<div class="time-modal-bg" id="timeModal" onclick="onModalBgClick(event)">
+  <div class="time-modal-sheet">
+    <h2 class="font-headline-md text-headline-md text-primary mb-1" id="modalName">—</h2>
+    <p class="font-label-sm text-label-sm text-outline uppercase tracking-widest mb-5">Arrival Schedule</p>
+    <div class="grid grid-cols-3 gap-2 mb-5 max-h-52 overflow-y-auto" id="timeGrid"
+      style="-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="closeTimeModal()" class="py-4 font-body-md text-sm font-bold text-primary border border-primary/30 rounded-xl active:bg-primary/10 transition-colors">Cancel</button>
+      <button onclick="confirmTime()" class="py-4 font-body-md text-sm font-bold bg-primary text-on-primary rounded-xl active:opacity-80 transition-opacity">Confirm</button>
+    </div>
+    <button id="modalRemove" onclick="setNotComing()" style="display:none"
+      class="w-full mt-3 py-3 font-label-sm text-label-sm text-error border border-error/20 rounded-xl active:bg-error/10 transition-colors uppercase tracking-widest">
+      Remove Attendance
+    </button>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     FIREBASE
+════════════════════════════ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+const cfg={
+  apiKey:"AIzaSyDomAcOETxGgbTZ60D_FABBG5PU3jNg7_w",
+  authDomain:"elroof-168d3.firebaseapp.com",
+  databaseURL:"https://elroof-168d3-default-rtdb.firebaseio.com",
+  projectId:"elroof-168d3",
+  storageBucket:"elroof-168d3.firebasestorage.app",
+  messagingSenderId:"843529304587",
+  appId:"1:843529304587:web:ebf8c48ab0d7507819250e"
+};
+const app=initializeApp(cfg);
+const db=getDatabase(app);
+window._db=db;window._ref=ref;window._set=set;window._onValue=onValue;
+boot();
+</script>
+
+<script>
+/* ── DATA ── */
+const MEMBERS=['hassan','ahmed','marwan','malek','zeyad','yassin','loay','seif','omar'];
+const ITEMS=[
+  {k:'sagayer',l:'Sagayer',icon:'inventory_2',sub:'Premium Selection'},
+  {k:'ahwa',   l:'Ahwa',   icon:'coffee',      sub:'Dark Roasted'},
+  {k:'sokar',  l:'Sokar',  icon:'grain',       sub:'Fine Crystals'},
+  {k:'shay',   l:'Shay',   icon:'energy_savings_leaf', sub:'Black Leaf'},
+];
+const TIMES=['10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM','10:00 PM'];
+
+let me=null,selIdx=null,selTime=null,modalIdx=null,unsub=null,state={},currentTab='hub';
+
+/* ── COOKIES ── */
+function setCookie(n,v,d=365){const x=new Date();x.setTime(x.getTime()+d*864e5);document.cookie=`${n}=${v};expires=${x.toUTCString()};path=/;SameSite=Lax`;}
+function getCookie(n){const m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return m?m[2]:null;}
+function deleteCookie(n){document.cookie=n+'=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';}
+
+/* ── BOOT ── */
+async function boot(){
+  await new Promise(r=>setTimeout(r,1200));
+  document.getElementById('loader').classList.add('gone');
+  const saved=getCookie('elroof_member');
+  if(saved!==null){
+    const idx=parseInt(saved);
+    if(idx>=0&&idx<MEMBERS.length){me=idx;enterMain();return;}
+  }
+  buildLogin();
+  document.getElementById('loginScreen').classList.add('active');
+}
+
+/* ── LOGIN ── */
+function buildLogin(){
+  const g=document.getElementById('loginGrid');
+  g.innerHTML='';
+  MEMBERS.forEach((name,i)=>{
+    const b=document.createElement('button');
+    b.className='py-3 px-2 bg-surface-container-high border border-primary/15 rounded-xl text-on-surface-variant font-body-md text-sm font-medium transition-all active:scale-95';
+    b.textContent=name;
+    b.onclick=()=>{
+      selIdx=i;
+      document.getElementById('lerr').textContent='';
+      document.getElementById('loginBtn').disabled=false;
+      document.querySelectorAll('#loginGrid button').forEach(x=>{
+        x.classList.remove('bg-primary','text-on-primary','border-primary');
+        x.classList.add('bg-surface-container-high','text-on-surface-variant','border-primary/15');
+      });
+      b.classList.remove('bg-surface-container-high','text-on-surface-variant','border-primary/15');
+      b.classList.add('bg-primary','text-on-primary','border-primary');
+    };
+    g.appendChild(b);
+  });
+}
+
+function doLogin(){
+  if(selIdx===null){showErr('Pick your name.');return;}
+  me=selIdx;setCookie('elroof_member',me);enterMain();
+}
+
+function doLogout(){
+  deleteCookie('elroof_member');
+  if(unsub)unsub();
+  me=null;selIdx=null;
+  document.getElementById('loginBtn').disabled=true;
+  document.getElementById('bottomNav').style.display='none';
+  ['hubScreen','pantryScreen','arrivalsScreen','broadcastsScreen'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  buildLogin();
+  document.getElementById('loginScreen').classList.add('active');
+}
+
+function showErr(m){const e=document.getElementById('lerr');e.textContent=m;setTimeout(()=>e.textContent='',2000);}
+
+/* ── ENTER MAIN ── */
+function enterMain(){
+  document.getElementById('loginScreen').classList.remove('active');
+  const initials=MEMBERS[me].slice(0,2).toUpperCase();
+  document.getElementById('hubAvatar').textContent=initials;
+  document.getElementById('pantryAvatar').textContent=initials;
+  const now=new Date();
+  document.getElementById('hubDateLabel').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('bottomNav').style.display='flex';
+  showTab('hub');
+  subscribeState();
+}
+
+/* ── TAB NAVIGATION ── */
+function showTab(tab){
+  currentTab=tab;
+  ['hub','pantry','arrivals','broadcasts'].forEach(t=>{
+    document.getElementById(t+'Screen').classList.remove('active');
+    const nb=document.getElementById('nav-'+t);
+    if(nb){
+      nb.classList.remove('bg-primary-container','text-on-primary-container','rounded-full','px-sm','py-xs','scale-90');
+      nb.classList.add('text-outline');
+    }
+  });
+  document.getElementById(tab+'Screen').classList.add('active');
+  const activeBtn=document.getElementById('nav-'+tab);
+  if(activeBtn){
+    activeBtn.classList.remove('text-outline');
+    activeBtn.classList.add('bg-primary-container','text-on-primary-container','rounded-full','px-sm','py-xs','scale-90');
+  }
+  // hide compose on non-broadcast tabs
+  const compose=document.querySelector('#broadcastsScreen section.fixed');
+  if(compose) compose.style.display=tab==='broadcasts'?'block':'none';
+}
+
+/* ── FIREBASE ── */
+function today(){return new Date().toISOString().split('T')[0];}
+function dbRef(p){return window._ref(window._db,p);}
+async function write(path,val){await window._set(dbRef(`days/${today()}/${path}`),val);}
+
+function subscribeState(){
+  if(unsub)unsub();
+  unsub=window._onValue(dbRef(`days/${today()}`),snap=>{
+    const raw=snap.val()||{};
+    state={coming:raw.coming||{},broadcasts:raw.broadcasts||[],items:{}};
+    ITEMS.forEach(it=>{state.items[it.k]=raw.items?.[it.k]??'available';});
+    renderAll();
+  });
+}
+
+/* ── RENDER ── */
+function renderAll(){renderHub();renderPantry();renderArrivals();renderBroadcast();}
+
+function renderHub(){
+  const coming=state.coming||{};
+  const count=Object.values(coming).filter(Boolean).length;
+  document.getElementById('hubCount').textContent=count;
+  document.getElementById('hubSubtitle').textContent=
+    count===0?'No one on the roof yet':
+    count===1?'1 member on the roof':
+    `${count} members on the roof`;
+}
+
+function renderPantry(){
+  const items=state.items||{};
+  const l=document.getElementById('pantryList');
+  l.innerHTML='';
+  ITEMS.forEach((it,idx)=>{
+    const on=items[it.k]==='available';
+    const wrap=document.createElement('div');
+    if(idx>0){
+      const div=document.createElement('div');
+      div.className='dot-divider';
+      div.innerHTML='<span class="dot-divider-star material-symbols-outlined text-sm">grade</span>';
+      l.appendChild(div);
+    }
+    wrap.className='arched-top bg-surface-container-high p-6 flex flex-col gap-5';
+    wrap.innerHTML=`
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 class="font-headline-md text-headline-md text-primary">${it.l}</h3>
+          <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-tighter mt-1">${it.sub}</p>
+        </div>
+        <span class="material-symbols-outlined text-outline">${it.icon}</span>
+      </div>
+      <div class="flex justify-between items-center">
+        <span class="font-body-md text-on-surface-variant" id="pstatus-${it.k}">${on?'Stocked':'Empty'}</span>
+        <label class="toggle-wrap">
+          <input type="checkbox" class="toggle-input" ${on?'checked':''} onchange="toggleItem('${it.k}')"/>
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    `;
+    l.appendChild(wrap);
+  });
+}
+
+function renderArrivals(){
+  const coming=state.coming||{};
+  const count=Object.values(coming).filter(Boolean).length;
+  document.getElementById('arrivalCount').textContent=`${count}/9`;
+  const l=document.getElementById('arrivalsList');
+  l.innerHTML='';
+  MEMBERS.forEach((name,i)=>{
+    const isSelf=i===me;
+    const time=coming[i];
+    const card=document.createElement('div');
+    card.className='member-row arched-top bg-surface-container-high p-5 flex items-center justify-between cursor-pointer'+(time?' here':'');
+    if(isSelf||!time) card.onclick=()=>openTimeModal(i,!!time);
+    const initials=name.slice(0,2).toUpperCase();
+    card.innerHTML=`
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 rounded-full border-2 ${time?'border-primary/30':'border-outline/20'} flex items-center justify-center bg-surface-container font-headline-md text-sm font-bold ${time?'text-primary':'text-outline'}">
+          ${initials}
+        </div>
+        <div>
+          <h3 class="font-body-lg text-sm font-bold ${time?'text-primary':'text-on-surface-variant'}">${name}</h3>
+          <p class="font-label-sm text-label-sm ${time?'text-outline':'text-outline-variant'}">${time||'Not yet set'}</p>
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-1">
+        ${time
+          ?`<span class="px-3 py-1 bg-primary text-on-primary rounded-full text-[10px] font-bold uppercase tracking-wider">Coming</span>`
+          :`<span class="px-3 py-1 border border-outline-variant text-outline-variant rounded-full text-[10px] font-bold uppercase tracking-wider">${isSelf?'Tap to set':'Awaiting'}</span>`
+        }
+      </div>
+    `;
+    l.appendChild(card);
+  });
+}
+
+function renderBroadcast(){
+  const broadcasts=state.broadcasts||[];
+  const container=document.getElementById('broadcastDisplay');
+  if(broadcasts.length===0){
+    container.innerHTML=`
+      <div class="relative pl-10">
+        <div class="absolute left-0 top-2 w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center border border-primary/20">
+          <span class="material-symbols-outlined text-primary" style="font-size:16px;">podcasts</span>
+        </div>
+        <div class="bg-surface-container-high p-5 rounded-xl border border-primary/10">
+          <p class="text-on-surface-variant text-sm italic">Nothing broadcast yet today.</p>
+        </div>
+      </div>`;
+    return;
+  }
+  container.innerHTML='';
+  const icons=['podcasts','campaign','record_voice_over','spatial_audio','hearing'];
+  broadcasts.forEach((b,idx)=>{
+    const el=document.createElement('div');
+    el.className='relative pl-10 mb-5';
+    const icon=icons[idx%icons.length];
+    el.innerHTML=`
+      <div class="absolute left-0 top-2 w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center border border-primary/20">
+        <span class="material-symbols-outlined text-primary" style="font-size:16px;">${icon}</span>
+      </div>
+      <div class="bg-surface-container-high p-5 rounded-xl border border-primary/10">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">${esc(b.from)}</span>
+          <span class="font-label-sm text-label-sm text-outline opacity-60">${formatTime(b.ts)}</span>
+        </div>
+        <p class="text-on-surface text-sm leading-relaxed">${esc(b.text)}</p>
+      </div>`;
+    container.appendChild(el);
+  });
+}
+
+/* ── TIME MODAL ── */
+function openTimeModal(idx,alreadyHere){
+  modalIdx=idx;selTime=null;
+  document.getElementById('modalName').textContent=MEMBERS[idx];
+  const g=document.getElementById('timeGrid');
+  g.innerHTML='';
+  const cur=state.coming?.[idx];
+  TIMES.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='time-btn'+(t===cur?' sel':'');
+    b.textContent=t;
+    if(t===cur)selTime=t;
+    b.onclick=()=>{selTime=t;document.querySelectorAll('.time-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');};
+    g.appendChild(b);
+  });
+  document.getElementById('modalRemove').style.display=alreadyHere?'block':'none';
+  document.getElementById('timeModal').classList.add('open');
+}
+function closeTimeModal(){document.getElementById('timeModal').classList.remove('open');}
+function onModalBgClick(e){if(e.target===document.getElementById('timeModal'))closeTimeModal();}
+
+async function confirmTime(){
+  if(!selTime){showToast('Pick a time first','gold');return;}
+  await write(`coming/${modalIdx}`,selTime);
+  closeTimeModal();showToast(`See you at ${selTime} ☀️`,'green');
+}
+async function setNotComing(){
+  await write(`coming/${modalIdx}`,null);
+  closeTimeModal();showToast('Removed from today','');
+}
+
+/* ── TOGGLE ITEM ── */
+async function toggleItem(k){
+  const cur=state.items?.[k]??'available';
+  const next=cur==='available'?'not available':'available';
+  await write(`items/${k}`,next);
+  const lbl=ITEMS.find(i=>i.k===k)?.l||k;
+  showToast(`${lbl}: ${next}`,next==='available'?'green':'');
+}
+
+/* ── BROADCAST ── */
+async function sendBroadcast(){
+  const inp=document.getElementById('bInput');
+  const txt=inp.value.trim();
+  if(!txt)return;
+  const existing=state.broadcasts||[];
+  const updated=[...existing,{text:txt,from:MEMBERS[me],ts:Date.now()}];
+  await write('broadcasts',updated);
+  inp.value='';showToast('Broadcast sent!','gold');
+}
+
+/* ── TOAST ── */
+let _tt;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show'+(type?' '+type:'');
+  clearTimeout(_tt);
+  _tt=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function formatTime(ts){if(!ts)return'';const d=new Date(ts);return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const inp=document.getElementById('bInput');
+  if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendBroadcast();}});
+  // hide compose initially
+  const compose=document.querySelector('#broadcastsScreen section.fixed');
+  if(compose)compose.style.display='none';
+});
+</script>
+</body>
+</html>
