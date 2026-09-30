@@ -11,13 +11,12 @@
 tailwind.config={darkMode:"class",theme:{extend:{
   colors:{
     "primary":"#e6d4a8","on-primary":"#3a2f10","primary-container":"#c9b88e","on-primary-container":"#544827",
-    "primary-fixed":"#f4e1b4","primary-fixed-dim":"#d7c59a","on-primary-fixed":"#231a01","on-primary-fixed-variant":"#514625",
+    "primary-fixed":"#f4e1b4","primary-fixed-dim":"#d7c59a","on-primary-fixed":"#231a01",
     "secondary":"#ffb596","on-secondary":"#581e00","secondary-container":"#76320f","on-secondary-container":"#fd9d71",
-    "tertiary":"#85e4e4","on-tertiary":"#003737","tertiary-container":"#68c8c8",
     "background":"#131313","on-background":"#e5e2e1","surface":"#131313","on-surface":"#e5e2e1",
-    "surface-variant":"#353535","on-surface-variant":"#cdc6b8","surface-dim":"#131313","surface-bright":"#393939",
+    "surface-variant":"#353535","on-surface-variant":"#cdc6b8","surface-dim":"#131313",
     "surface-container-lowest":"#0e0e0e","surface-container-low":"#1b1b1c","surface-container":"#202020",
-    "surface-container-high":"#2a2a2a","surface-container-highest":"#353535","surface-tint":"#d7c59a",
+    "surface-container-high":"#2a2a2a","surface-container-highest":"#353535",
     "inverse-surface":"#e5e2e1","inverse-on-surface":"#303030","inverse-primary":"#6a5d3a",
     "outline":"#979083","outline-variant":"#4b463c",
     "error":"#ffb4ab","on-error":"#690005","error-container":"#93000a","on-error-container":"#ffdad6",
@@ -37,365 +36,618 @@ tailwind.config={darkMode:"class",theme:{extend:{
 }}}
 </script>
 <style>
-body{min-height:max(884px,100dvh);background:#131313;color:#e5e2e1;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
-.screen{display:none;}
-.screen.active{display:flex;}
+/* ═══════════════════════════════════
+   BASE
+═══════════════════════════════════ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{min-height:max(884px,100dvh);background:#0a0a0f;color:#e5e2e1;overflow-x:hidden;font-family:'Manrope',sans-serif;-webkit-font-smoothing:antialiased;}
+
+/* ═══════════════════════════════════
+   ANIMATED BACKGROUND
+═══════════════════════════════════ */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ═══════════════════════════════════
+   SCREEN TRANSITIONS
+═══════════════════════════════════ */
+.screen{display:none;position:relative;z-index:10;min-height:100vh;}
+.screen.active{display:block;}
 #hubScreen.active,#loginScreen.active{display:flex;}
-#pantryScreen.active,#arrivalsScreen.active,#broadcastsScreen.active,#leaderboardScreen.active,#financeScreen.active{display:block;}
-.pattern-overlay{position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l2.5 12.5L45 15l-12.5 2.5L30 30l-2.5-12.5L15 15l12.5-2.5z' fill='%23e6d4a8' fill-opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
-#loader{position:fixed;inset:0;background:#131313;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .7s;}
+
+.screen-enter{animation:screenIn .45s cubic-bezier(.22,1,.36,1) both;}
+.screen-exit{animation:screenOut .3s cubic-bezier(.4,0,1,1) both;}
+@keyframes screenIn{from{opacity:0;transform:translateY(24px) scale(.98);}to{opacity:1;transform:none;}}
+@keyframes screenOut{from{opacity:1;}to{opacity:0;transform:translateY(-12px);}}
+
+/* ═══════════════════════════════════
+   LOADER
+═══════════════════════════════════ */
+#loader{position:fixed;inset:0;background:#0a0a0f;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s ease;}
 #loader.gone{opacity:0;pointer-events:none;}
-.loader-roof{width:90px;height:64px;background:#c9b88e;border-radius:3px;position:relative;box-shadow:7px 7px 0 #8a7048,0 24px 50px rgba(0,0,0,.6);animation:lb 1.6s ease infinite;}
-.loader-roof::before{content:'';position:absolute;inset:8px;border:1.5px dashed rgba(160,128,80,.3);border-radius:2px;}
-@keyframes lb{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
-.entrance-sweep{animation:sweep .8s cubic-bezier(.16,1,.3,1) forwards;}
-@keyframes sweep{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-.arched-top{border-top-left-radius:200px;border-top-right-radius:200px;}
-.dot-divider{display:flex;align-items:center;width:100%;margin:20px 0;}
-.dot-divider::before,.dot-divider::after{content:'';flex:1;height:1px;background:rgba(201,184,142,.2);}
-.dot-divider-star{margin:0 14px;color:#e6d4a8;font-size:13px;}
+.loader-word{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;letter-spacing:-3px;color:#e6d4a8;position:relative;}
+.loader-word::after{content:'';position:absolute;bottom:-8px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#e6d4a8,transparent);animation:lineSlide 1.5s ease infinite;}
+@keyframes lineSlide{0%{transform:scaleX(0);}50%{transform:scaleX(1);}100%{transform:scaleX(0);}}
+.loader-bar-wrap{width:120px;height:2px;background:rgba(230,212,168,.1);border-radius:2px;margin-top:32px;overflow:hidden;}
+.loader-bar-fill{height:100%;width:0;background:#e6d4a8;border-radius:2px;animation:barFill 1.5s ease forwards;}
+@keyframes barFill{to{width:100%;}}
+
+/* ═══════════════════════════════════
+   TOAST
+═══════════════════════════════════ */
+.toast{position:fixed;bottom:6rem;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(20,20,28,.95);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e5e2e1;z-index:600;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.green{border-color:rgba(100,210,130,.35);box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(100,210,130,.1);}
+.toast.gold{border-color:rgba(230,212,168,.35);box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 20px rgba(230,212,168,.1);}
+
+/* ═══════════════════════════════════
+   RIPPLE
+═══════════════════════════════════ */
+.ripple-host{position:relative;overflow:hidden;}
+.ripple{position:absolute;border-radius:50%;background:rgba(230,212,168,.18);transform:scale(0);animation:rippleAnim .55s ease-out forwards;pointer-events:none;}
+@keyframes rippleAnim{to{transform:scale(4);opacity:0;}}
+
+/* ═══════════════════════════════════
+   LOGIN
+═══════════════════════════════════ */
+#loginScreen{flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1.2rem 3rem;}
+
+.login-glow{position:fixed;top:30%;left:50%;transform:translate(-50%,-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(230,212,168,.07) 0%,transparent 70%);pointer-events:none;animation:glowPulse 4s ease infinite;}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}}
+
+.login-brand{text-align:center;margin-bottom:2.5rem;}
+.login-brand-name{font-family:'Syne',sans-serif;font-size:72px;font-weight:800;letter-spacing:-5px;color:#e6d4a8;line-height:1;position:relative;display:inline-block;}
+.login-brand-name::before{content:attr(data-text);position:absolute;inset:0;background:linear-gradient(135deg,#e6d4a8,#c9973a,#e6d4a8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmerText 3s ease infinite;background-size:200% 100%;}
+@keyframes shimmerText{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.login-tagline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:5px;color:rgba(230,212,168,.35);text-transform:uppercase;margin-top:6px;}
+
+.login-card{width:100%;max-width:400px;background:rgba(18,18,26,.8);border:1px solid rgba(230,212,168,.1);border-radius:24px;padding:1.8rem;backdrop-filter:blur(20px);box-shadow:0 40px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);}
+.login-card-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:rgba(230,212,168,.4);text-transform:uppercase;margin-bottom:14px;}
+
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:1.4rem;}
+.mbtn{padding:12px 8px;background:rgba(255,255,255,.04);border:1px solid rgba(230,212,168,.1);border-radius:12px;color:rgba(230,212,168,.5);font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;min-height:46px;position:relative;overflow:hidden;}
+.mbtn:hover{background:rgba(230,212,168,.06);border-color:rgba(230,212,168,.25);color:rgba(230,212,168,.8);}
+.mbtn.sel{background:linear-gradient(135deg,rgba(201,151,58,.2),rgba(230,212,168,.12));border-color:#e6d4a8;color:#e6d4a8;box-shadow:0 0 20px rgba(230,212,168,.12),inset 0 1px 0 rgba(255,255,255,.1);}
+
+.enter-btn{width:100%;padding:16px;background:linear-gradient(135deg,#c9973a,#e6d4a8);border:none;border-radius:14px;color:#0a0a0f;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;min-height:52px;position:relative;overflow:hidden;box-shadow:0 4px 24px rgba(201,151,58,.3);}
+.enter-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .4s ease;}
+.enter-btn:hover::before{transform:translateX(100%);}
+.enter-btn:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(201,151,58,.4);}
+.enter-btn:active{transform:translateY(0);}
+.enter-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none;}
+.lerr{text-align:center;font-size:11px;color:#ffb4ab;margin-top:10px;height:16px;}
+
+/* ═══════════════════════════════════
+   TOPBAR
+═══════════════════════════════════ */
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:64px;background:rgba(10,10,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(230,212,168,.07);}
+.topbar-brand{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#e6d4a8;letter-spacing:-1px;}
+.topbar-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c9973a,#e6d4a8);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:#0a0a0f;box-shadow:0 0 16px rgba(201,151,58,.3);}
+.topbar-back{display:flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;color:rgba(230,212,168,.5);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:0;transition:color .2s;min-height:44px;}
+.topbar-back:hover{color:#e6d4a8;}
+
+/* ═══════════════════════════════════
+   HUB — ANIMATED CANVAS
+═══════════════════════════════════ */
+#hubScreen{flex-direction:column;}
+.hub-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px 110px;}
+
+/* Orb container */
+.hub-orb-wrap{position:relative;width:min(88vw,320px);aspect-ratio:1;}
+
+/* Rotating outer ring */
+.hub-ring-outer{position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(230,212,168,.08);animation:spinSlow 20s linear infinite;}
+.hub-ring-outer::before{content:'';position:absolute;top:0;left:50%;width:6px;height:6px;background:#c9973a;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 12px #c9973a;}
+.hub-ring-mid{position:absolute;inset:-18px;border-radius:50%;border:1px dashed rgba(230,212,168,.05);animation:spinSlow 30s linear infinite reverse;}
+@keyframes spinSlow{to{transform:rotate(360deg);}}
+
+/* Main orb body */
+.hub-orb{position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 40% 35%,rgba(50,45,70,.9),rgba(18,18,28,.95));border:1px solid rgba(230,212,168,.12);box-shadow:0 0 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06),0 0 100px rgba(201,151,58,.04);overflow:hidden;}
+
+/* Orb animated shimmer surface */
+.hub-orb::before{content:'';position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0deg,rgba(230,212,168,.04) 60deg,transparent 120deg);animation:orbShimmer 8s linear infinite;}
+@keyframes orbShimmer{to{transform:rotate(360deg);}}
+
+/* Pulsing glow at center */
+.hub-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80px;height:80px;}
+.hub-core-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(230,212,168,.15);animation:corePulse 2.5s ease infinite;}
+.hub-core-ring:nth-child(2){inset:-12px;border-color:rgba(230,212,168,.08);animation-delay:.4s;}
+.hub-core-ring:nth-child(3){inset:-24px;border-color:rgba(230,212,168,.04);animation-delay:.8s;}
+@keyframes corePulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.05);}}
+.hub-core-center{position:absolute;inset:12px;border-radius:50%;background:rgba(230,212,168,.06);display:flex;align-items:center;justify-content:center;border:1px solid rgba(230,212,168,.12);}
+.hub-count-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:rgba(230,212,168,.7);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
+.hub-count-num.bump{animation:countBump .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes countBump{0%{transform:scale(1.5);color:#e6d4a8;}100%{transform:scale(1);}}
+
+/* Zone buttons */
+.zone-btn{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:0;transform:translate(-50%,-50%);transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.zone-btn:active{transform:translate(-50%,-50%) scale(.92);}
+.zone-circle{width:58px;height:58px;border-radius:50%;background:rgba(20,20,30,.9);border:1px solid rgba(230,212,168,.15);display:flex;align-items:center;justify-content:center;transition:all .3s;box-shadow:0 4px 20px rgba(0,0,0,.4);}
+.zone-btn:hover .zone-circle,.zone-btn:active .zone-circle{background:rgba(230,212,168,.1);border-color:#e6d4a8;box-shadow:0 0 24px rgba(230,212,168,.2);}
+.zone-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:rgba(230,212,168,.5);text-transform:uppercase;transition:color .3s;}
+.zone-btn:hover .zone-label{color:rgba(230,212,168,.9);}
+
+/* Active indicator on zone btns */
+.zone-badge{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:#c9973a;border:2px solid #0a0a0f;display:none;align-items:center;justify-content:center;font-size:7px;font-weight:900;color:#0a0a0f;font-family:'Syne',sans-serif;}
+.zone-badge.show{display:flex;animation:badgePop .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes badgePop{from{transform:scale(0);}to{transform:scale(1);}}
+
+/* Hub subtitle */
+.hub-sub{margin-top:28px;text-align:center;}
+.hub-date{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(230,212,168,.3);text-transform:uppercase;}
+.hub-status{font-size:14px;color:rgba(230,212,168,.5);margin-top:4px;transition:all .4s;font-weight:500;}
+
+/* ═══════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════ */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;justify-content:space-around;align-items:center;padding:8px 8px max(16px,env(safe-area-inset-bottom,0px));background:rgba(10,10,15,.92);border-top:1px solid rgba(230,212,168,.07);backdrop-filter:blur(20px);}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:6px 8px;min-width:44px;min-height:50px;color:rgba(230,212,168,.3);transition:all .2s;border-radius:12px;position:relative;}
+.nav-btn.active{color:#e6d4a8;}
+.nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:2px;background:linear-gradient(90deg,transparent,#e6d4a8,transparent);border-radius:2px;}
+.nav-btn:active{transform:scale(.9);}
+.nav-btn span.material-symbols-outlined{font-size:20px;transition:transform .2s;}
+.nav-btn.active span.material-symbols-outlined{transform:translateY(-1px);}
+.nav-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;}
+
+/* ═══════════════════════════════════
+   ARRIVALS
+═══════════════════════════════════ */
+.arrival-count-wrap{text-align:center;margin-bottom:24px;}
+.arrival-count-num{font-family:'Syne',sans-serif;font-size:80px;font-weight:800;letter-spacing:-4px;line-height:1;background:linear-gradient(135deg,#e6d4a8,#c9973a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.arrival-count-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-top:4px;}
+
+.member-card{background:rgba(18,18,26,.8);border:1px solid rgba(230,212,168,.08);border-radius:18px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:default;transition:all .25s;position:relative;overflow:hidden;}
+.member-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);}
+.member-card.self{cursor:pointer;border-color:rgba(230,212,168,.15);}
+.member-card.self:hover{border-color:rgba(230,212,168,.3);background:rgba(230,212,168,.04);transform:translateY(-1px);}
+.member-card.self:active{transform:scale(.98);}
+.member-card.here{border-color:rgba(100,200,130,.2);background:rgba(100,200,130,.04);}
+.member-card.here.self{border-color:rgba(100,200,130,.35);}
+
+.mem-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;transition:all .3s;flex-shrink:0;}
+.mem-av.default{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);color:rgba(230,212,168,.4);}
+.mem-av.here-av{background:rgba(100,200,130,.12);border:1.5px solid rgba(100,200,130,.3);color:#6dc87a;}
+.mem-av.self-av{border:1.5px solid rgba(230,212,168,.4);}
+
+.mem-badge{padding:4px 12px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.mem-badge.coming{background:linear-gradient(135deg,rgba(230,212,168,.15),rgba(201,151,58,.1));border:1px solid rgba(230,212,168,.3);color:#e6d4a8;}
+.mem-badge.waiting{background:transparent;border:1px solid rgba(255,255,255,.08);color:rgba(230,212,168,.3);}
+.mem-badge.tap{background:rgba(230,212,168,.08);border:1px solid rgba(230,212,168,.2);color:rgba(230,212,168,.6);}
+
+/* Stagger animation for list items */
+.stagger-item{opacity:0;animation:staggerIn .4s ease forwards;}
+@keyframes staggerIn{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:none;}}
+
+/* ═══════════════════════════════════
+   PANTRY
+═══════════════════════════════════ */
+.item-card{background:rgba(18,18,26,.8);border:1px solid rgba(230,212,168,.08);border-radius:16px;padding:16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.item-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(230,212,168,.03),transparent);opacity:0;transition:opacity .25s;}
+.item-card:hover::before{opacity:1;}
+.item-card:active{transform:scale(.98);}
+.item-card.avail{border-color:rgba(100,200,130,.2);background:rgba(100,200,130,.04);}
+.item-card.avail:hover{border-color:rgba(100,200,130,.35);}
+
+.item-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:20px;flex-shrink:0;}
+.item-icon-wrap.off{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);}
+.item-icon-wrap.on{background:rgba(100,200,130,.1);border:1px solid rgba(100,200,130,.2);}
+
+.item-pill{padding:5px 14px;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;transition:all .25s;}
+.item-pill.on{background:rgba(100,200,130,.12);border:1px solid rgba(100,200,130,.3);color:#6dc87a;}
+.item-pill.off{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:rgba(230,212,168,.3);}
+
+/* Toggle switch */
 .toggle-wrap{position:relative;display:inline-block;}
 .toggle-input{position:absolute;opacity:0;width:0;height:0;}
-.toggle-track{width:72px;height:36px;background:#2a2a2a;border-radius:999px;cursor:pointer;transition:all .4s ease;border:1px solid rgba(230,212,168,.2);display:block;position:relative;}
-.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:28px;height:28px;background:#e6d4a8;border-radius:50%;transition:all .4s cubic-bezier(.68,-.55,.265,1.55);box-shadow:0 0 12px rgba(230,212,168,.3);}
-.toggle-input:checked+.toggle-track{background:#544827;}
-.toggle-input:checked+.toggle-track::after{left:40px;background:#131313;}
-.time-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
-.time-modal-bg.open{opacity:1;pointer-events:all;}
-.time-modal-sheet{width:100%;max-width:480px;background:#2a2a2a;border-top-left-radius:24px;border-top-right-radius:24px;padding:1.5rem 1.5rem 2.5rem;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);border-top:1px solid rgba(230,212,168,.15);}
-.time-modal-sheet::before{content:'';display:block;width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:0 auto 1.4rem;}
-.time-modal-bg.open .time-modal-sheet{transform:translateY(0);}
-.time-btn{padding:12px 4px;background:rgba(255,255,255,.06);border:1px solid rgba(201,184,142,.18);border-radius:8px;color:#cdc6b8;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;text-align:center;transition:all .13s;min-height:44px;}
-.time-btn:active,.time-btn.sel{background:rgba(230,212,168,.18);border-color:#e6d4a8;color:#e6d4a8;font-weight:700;}
-.toast{position:fixed;bottom:6rem;left:50%;transform:translateX(-50%) translateY(70px);background:#202020;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e5e2e1;z-index:600;transition:transform .32s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,.5);}
-.toast.show{transform:translateX(-50%) translateY(0);}
-.toast.green{border-color:rgba(100,200,130,.3);}
-.toast.gold{border-color:rgba(230,212,168,.3);}
-.member-row{border:1px solid rgba(201,184,142,.12);transition:transform .2s,border-color .2s;}
-.member-row:active{transform:scale(.98);}
-.member-row.here{border-color:rgba(201,184,142,.25);}
-/* Finance modal */
-.fin-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.toggle-track{width:64px;height:32px;background:rgba(255,255,255,.06);border-radius:999px;cursor:pointer;transition:all .4s cubic-bezier(.34,1.56,.64,1);border:1px solid rgba(255,255,255,.08);display:block;position:relative;}
+.toggle-track::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;background:rgba(230,212,168,.5);border-radius:50%;transition:all .4s cubic-bezier(.68,-.55,.265,1.55);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.toggle-input:checked+.toggle-track{background:rgba(100,200,130,.2);border-color:rgba(100,200,130,.3);}
+.toggle-input:checked+.toggle-track::after{left:37px;background:#6dc87a;box-shadow:0 0 12px rgba(100,200,130,.4);}
+
+/* ═══════════════════════════════════
+   BROADCASTS
+═══════════════════════════════════ */
+.signal-card{background:rgba(18,18,26,.8);border:1px solid rgba(230,212,168,.07);border-radius:16px;padding:16px;position:relative;overflow:hidden;transition:all .3s;}
+.signal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(230,212,168,.1),transparent);}
+.signal-card:hover{border-color:rgba(230,212,168,.15);}
+
+.signal-icon{width:32px;height:32px;border-radius:50%;background:rgba(230,212,168,.07);border:1px solid rgba(230,212,168,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.compose-bar{position:fixed;bottom:72px;left:0;right:0;z-index:40;padding:0 16px;}
+.compose-inner{background:rgba(14,14,20,.95);border:1px solid rgba(230,212,168,.12);border-radius:20px 20px 0 0;padding:16px 16px 12px;backdrop-filter:blur(20px);box-shadow:0 -20px 60px rgba(0,0,0,.4);}
+.compose-input{width:100%;background:transparent;border:0;outline:none;color:#e5e2e1;font-family:'Manrope',sans-serif;font-size:14px;caret-color:#e6d4a8;padding:0;}
+.compose-input::placeholder{color:rgba(230,212,168,.25);}
+.compose-divider{height:1px;background:rgba(230,212,168,.1);margin:10px 0;}
+.send-btn{background:none;border:none;cursor:pointer;color:rgba(230,212,168,.6);padding:0;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:color .2s;}
+.send-btn:hover{color:#e6d4a8;}
+.send-btn:active{transform:scale(.95);}
+
+/* ═══════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════ */
+.podium-wrap{display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:32px;padding:0 8px;}
+.podium-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.podium-av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;}
+.podium-base{border-radius:10px 10px 0 0;width:74px;display:flex;align-items:center;justify-content:center;}
+.podium-count{font-family:'Syne',sans-serif;font-weight:800;}
+
+.lb-row{background:rgba(18,18,26,.8);border:1px solid rgba(230,212,168,.07);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .25s;}
+.lb-row.lb-me{border-color:rgba(230,212,168,.2);background:rgba(230,212,168,.03);}
+.lb-row:hover{border-color:rgba(230,212,168,.12);}
+.lb-rank-num{font-family:'JetBrains Mono',monospace;font-size:13px;color:rgba(230,212,168,.3);width:22px;text-align:center;}
+.lb-av-sm{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.05);border:1.5px solid rgba(230,212,168,.12);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:800;color:rgba(230,212,168,.5);}
+.lb-count{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:rgba(230,212,168,.4);}
+
+/* ═══════════════════════════════════
+   FINANCE
+═══════════════════════════════════ */
+.debt-card{border-radius:20px;padding:20px;margin-bottom:20px;position:relative;overflow:hidden;}
+.debt-card.owe{background:linear-gradient(135deg,rgba(255,80,80,.08),rgba(255,80,80,.03));border:1px solid rgba(255,100,100,.15);}
+.debt-card.clear{background:linear-gradient(135deg,rgba(100,200,130,.08),rgba(100,200,130,.03));border:1px solid rgba(100,200,130,.15);}
+
+.exp-card{background:rgba(18,18,26,.8);border:1px solid rgba(230,212,168,.07);border-radius:18px;padding:16px;transition:all .25s;position:relative;overflow:hidden;}
+.exp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(230,212,168,.08),transparent);}
+.exp-card.mine{border-color:rgba(230,212,168,.15);}
+.exp-card:hover{border-color:rgba(230,212,168,.12);}
+
+.split-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;}
+.split-row+.split-row{border-top:1px solid rgba(255,255,255,.04);}
+
+/* ═══════════════════════════════════
+   TIME MODAL
+═══════════════════════════════════ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal-sheet{width:100%;max-width:480px;background:rgba(18,18,28,.97);border-top-left-radius:28px;border-top-right-radius:28px;padding:0 1.5rem 2.5rem;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);border-top:1px solid rgba(230,212,168,.12);}
+.modal-handle{width:36px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;margin:16px auto 20px;}
+.modal-bg.open .modal-sheet{transform:translateY(0);}
+
+.time-btn{padding:12px 4px;background:rgba(255,255,255,.04);border:1px solid rgba(230,212,168,.1);border-radius:10px;color:rgba(230,212,168,.5);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;text-align:center;transition:all .15s;min-height:46px;}
+.time-btn:active,.time-btn.sel{background:rgba(230,212,168,.12);border-color:#e6d4a8;color:#e6d4a8;font-weight:700;box-shadow:0 0 16px rgba(230,212,168,.1);}
+
+/* ═══════════════════════════════════
+   FINANCE MODAL
+═══════════════════════════════════ */
+.fin-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
 .fin-modal-bg.open{opacity:1;pointer-events:all;}
-.fin-sheet{width:100%;max-width:520px;background:#1b1b1c;border-top-left-radius:24px;border-top-right-radius:24px;padding:0 1.5rem 2.5rem;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);border-top:1px solid rgba(230,212,168,.15);}
-.fin-sheet::before{content:'';display:block;width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;margin:1rem auto 1.4rem;}
+.fin-sheet{width:100%;max-width:520px;background:rgba(14,14,22,.98);border-top-left-radius:28px;border-top-right-radius:28px;padding:0 1.5rem 2.5rem;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);border-top:1px solid rgba(230,212,168,.1);}
+.fin-sheet::before{content:'';display:block;width:36px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;margin:16px auto 20px;}
 .fin-modal-bg.open .fin-sheet{transform:translateY(0);}
 .fin-sheet::-webkit-scrollbar{display:none;}
-/* Member checkboxes in finance */
-.mem-check-btn{padding:10px 8px;background:rgba(255,255,255,.05);border:1px solid rgba(201,184,142,.15);border-radius:10px;color:#979083;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;text-align:center;transition:all .15s;min-height:44px;}
-.mem-check-btn.sel{background:rgba(230,212,168,.15);border-color:#e6d4a8;color:#e6d4a8;}
-/* Leaderboard rank styles */
-.rank-1{color:#FFD700;}
-.rank-2{color:#C0C0C0;}
-.rank-3{color:#CD7F32;}
+
+.fin-input{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(230,212,168,.1);border-radius:12px;padding:12px 14px;color:#e5e2e1;font-family:'Manrope',sans-serif;font-size:14px;outline:none;transition:border-color .2s;}
+.fin-input:focus{border-color:rgba(230,212,168,.3);box-shadow:0 0 0 3px rgba(230,212,168,.06);}
+.fin-input::placeholder{color:rgba(230,212,168,.2);}
+
+.mem-check-btn{padding:10px 6px;background:rgba(255,255,255,.04);border:1px solid rgba(230,212,168,.1);border-radius:10px;color:rgba(230,212,168,.4);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;text-align:center;transition:all .15s;min-height:44px;}
+.mem-check-btn.sel{background:rgba(230,212,168,.1);border-color:#e6d4a8;color:#e6d4a8;}
+
+.action-btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,#c9973a,#e6d4a8);border:none;border-radius:14px;color:#0a0a0f;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;min-height:50px;box-shadow:0 4px 20px rgba(201,151,58,.25);}
+.action-btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,151,58,.35);}
+.action-btn-primary:active{transform:scale(.98);}
+.action-btn-ghost{flex:1;padding:13px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;color:rgba(230,212,168,.6);font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;min-height:48px;}
+.action-btn-ghost:hover{border-color:rgba(230,212,168,.2);color:#e6d4a8;}
+
+/* ═══════════════════════════════════
+   SHARED
+═══════════════════════════════════ */
+.section-header{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:12px;}
+.arched-top{border-top-left-radius:200px;border-top-right-radius:200px;}
+.dot-divider{display:flex;align-items:center;margin:16px 0;}
+.dot-divider::before,.dot-divider::after{content:'';flex:1;height:1px;background:rgba(230,212,168,.08);}
+.dot-divider-star{margin:0 12px;color:rgba(230,212,168,.2);font-size:11px;}
 </style>
 </head>
-<body class="dark font-body-md">
-<div class="pattern-overlay"></div>
+<body class="dark">
 
-<!-- LOADER -->
-<div id="loader">
-  <div class="loader-roof"></div>
-  <p class="mt-8 font-label-sm text-label-sm text-primary/40 uppercase tracking-[.4em]">ElRoof</p>
-</div>
+<!-- ANIMATED BG -->
+<canvas id="bgCanvas"></canvas>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- ══ LOGIN ══ -->
-<div id="loginScreen" class="screen flex-col items-center justify-center min-h-screen px-5 py-10 relative z-10">
-  <div class="w-full max-w-sm entrance-sweep">
-    <div class="text-center mb-10">
-      <h1 class="font-display-lg text-display-lg text-primary" style="font-family:Syne;letter-spacing:-3px;">ElRoof</h1>
-      <p class="font-label-sm text-label-sm text-outline uppercase tracking-[.3em] mt-1">Who's going up today?</p>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-word" data-text="ElRoof">ElRoof</div>
+  <div class="loader-bar-wrap"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- ══════════════════════════════════
+     LOGIN
+══════════════════════════════════ -->
+<div id="loginScreen" class="screen">
+  <div class="login-glow"></div>
+  <div class="w-full max-w-sm mx-auto" style="animation:screenIn .6s cubic-bezier(.22,1,.36,1) both;">
+    <div class="login-brand mb-8">
+      <div class="login-brand-name" data-text="ElRoof">ElRoof</div>
+      <div class="login-tagline">Your roof. Your crew.</div>
     </div>
-    <div class="arched-top bg-surface-container-low border border-primary/10 p-6 pt-10 relative overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-24 bg-primary/10 blur-3xl rounded-full"></div>
-      <p class="font-label-sm text-label-sm text-outline uppercase tracking-[.2em] mb-4 relative z-10">Choose your name</p>
-      <div class="grid grid-cols-3 gap-2 mb-6 relative z-10" id="loginGrid"></div>
-      <button id="loginBtn" onclick="doLogin()" disabled class="w-full py-4 font-headline-md text-body-md font-bold bg-primary text-on-primary rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(230,212,168,.15)] relative z-10">↑ Head Up</button>
-      <p class="text-center font-label-sm text-label-sm text-error mt-3 h-4 relative z-10" id="lerr"></p>
+    <div class="login-card">
+      <div class="login-card-label">Who are you?</div>
+      <div class="mgrid" id="loginGrid"></div>
+      <button id="loginBtn" onclick="doLogin()" disabled class="enter-btn ripple-host">↑ Head Up</button>
+      <p class="lerr" id="lerr"></p>
     </div>
   </div>
 </div>
 
-<!-- ══ HUB ══ -->
-<div id="hubScreen" class="screen flex-col min-h-screen relative z-10">
-  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
-    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center font-label-sm text-label-sm font-bold text-on-primary" id="hubAvatar">—</div>
-    <h1 class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</h1>
-    <button class="text-primary" onclick="showTab('hub')"><span class="material-symbols-outlined">sensors</span></button>
-  </header>
-  <main class="flex-grow flex flex-col items-center justify-center px-4 pb-32 entrance-sweep">
-    <div class="relative w-[88vw] max-w-sm aspect-square bg-surface-container-high rounded-full border border-primary/10 shadow-2xl overflow-hidden" id="rooftopCanvas">
-      <div class="absolute inset-0 opacity-30" style="background-image:url('https://www.transparenttextures.com/patterns/stardust.png');mix-blend-mode:overlay;"></div>
-      <!-- Broadcasts top -->
-      <button class="group absolute top-[8%] left-1/2 -translate-x-1/2 flex flex-col items-center z-20" onclick="showTab('broadcasts')">
-        <div class="w-16 h-16 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 transition-all duration-300">
-          <span class="material-symbols-outlined text-primary text-2xl">podcasts</span>
-        </div>
-        <span class="mt-1 font-label-sm text-label-sm text-primary tracking-widest uppercase" style="font-size:9px;">Broadcasts</span>
-      </button>
-      <!-- Arrivals bottom-left -->
-      <button class="group absolute bottom-[18%] left-[6%] flex flex-col items-center z-20" onclick="showTab('arrivals')">
-        <div class="w-16 h-16 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 transition-all duration-300">
-          <span class="material-symbols-outlined text-primary text-2xl">flight_land</span>
-        </div>
-        <span class="mt-1 font-label-sm text-label-sm text-primary tracking-widest uppercase" style="font-size:9px;">Arrivals</span>
-      </button>
-      <!-- Pantry bottom-right -->
-      <button class="group absolute bottom-[18%] right-[6%] flex flex-col items-center z-20" onclick="showTab('pantry')">
-        <div class="w-16 h-16 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 transition-all duration-300">
-          <span class="material-symbols-outlined text-primary text-2xl">kitchen</span>
-        </div>
-        <span class="mt-1 font-label-sm text-label-sm text-primary tracking-widest uppercase" style="font-size:9px;">Pantry</span>
-      </button>
-      <!-- Leaderboard top-left -->
-      <button class="group absolute top-[28%] left-[4%] flex flex-col items-center z-20" onclick="showTab('leaderboard')">
-        <div class="w-14 h-14 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 transition-all duration-300">
-          <span class="material-symbols-outlined text-primary text-xl">emoji_events</span>
-        </div>
-        <span class="mt-1 font-label-sm text-label-sm text-primary tracking-widest uppercase" style="font-size:9px;">Board</span>
-      </button>
-      <!-- Finance top-right -->
-      <button class="group absolute top-[28%] right-[4%] flex flex-col items-center z-20" onclick="showTab('finance')">
-        <div class="w-14 h-14 bg-surface-container-high rounded-full border border-primary/20 flex items-center justify-center group-active:scale-110 transition-all duration-300">
-          <span class="material-symbols-outlined text-primary text-xl">payments</span>
-        </div>
-        <span class="mt-1 font-label-sm text-label-sm text-primary tracking-widest uppercase" style="font-size:9px;">Finance</span>
-      </button>
-      <!-- Core -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border border-primary/10 rounded-full flex items-center justify-center">
-        <div class="w-11 h-11 bg-primary/5 rounded-full flex items-center justify-center border border-primary/10 animate-pulse">
-          <span class="font-display-lg text-primary/40 text-lg font-bold" id="hubCount">0</span>
+<!-- ══════════════════════════════════
+     HUB
+══════════════════════════════════ -->
+<div id="hubScreen" class="screen">
+  <div class="topbar">
+    <div class="topbar-avatar" id="hubAvatar">—</div>
+    <div class="topbar-brand">ElRoof</div>
+    <div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;">
+      <div style="width:8px;height:8px;border-radius:50%;background:#6dc87a;box-shadow:0 0 10px #6dc87a;animation:corePulse 2s ease infinite;"></div>
+    </div>
+  </div>
+  <div class="hub-main">
+    <div class="hub-orb-wrap">
+      <div class="hub-ring-outer"></div>
+      <div class="hub-ring-mid"></div>
+      <div class="hub-orb">
+        <!-- Zone: Broadcasts (top) -->
+        <button class="zone-btn ripple-host" style="top:12%;left:50%;" onclick="showTab('broadcasts')" aria-label="Broadcasts">
+          <div class="zone-circle">
+            <span class="material-symbols-outlined text-primary" style="font-size:22px;">podcasts</span>
+          </div>
+          <span class="zone-label">Signals</span>
+          <div class="zone-badge" id="badge-broadcasts"></div>
+        </button>
+        <!-- Zone: Arrivals (bottom-left) -->
+        <button class="zone-btn ripple-host" style="bottom:22%;left:14%;" onclick="showTab('arrivals')" aria-label="Arrivals">
+          <div class="zone-circle">
+            <span class="material-symbols-outlined text-primary" style="font-size:22px;">flight_land</span>
+          </div>
+          <span class="zone-label">Arrivals</span>
+          <div class="zone-badge" id="badge-arrivals"></div>
+        </button>
+        <!-- Zone: Pantry (bottom-right) -->
+        <button class="zone-btn ripple-host" style="bottom:22%;right:14%;transform:translate(50%,50%);" onclick="showTab('pantry')" aria-label="Pantry">
+          <div class="zone-circle">
+            <span class="material-symbols-outlined text-primary" style="font-size:22px;">kitchen</span>
+          </div>
+          <span class="zone-label">Pantry</span>
+          <div class="zone-badge" id="badge-pantry"></div>
+        </button>
+        <!-- Zone: Leaderboard (left-mid) -->
+        <button class="zone-btn ripple-host" style="top:38%;left:4%;transform:translate(0,-50%);" onclick="showTab('leaderboard')" aria-label="Leaderboard">
+          <div class="zone-circle" style="width:50px;height:50px;">
+            <span class="material-symbols-outlined text-primary" style="font-size:18px;">emoji_events</span>
+          </div>
+          <span class="zone-label">Board</span>
+        </button>
+        <!-- Zone: Finance (right-mid) -->
+        <button class="zone-btn ripple-host" style="top:38%;right:4%;transform:translate(0,-50%);" onclick="showTab('finance')" aria-label="Finance">
+          <div class="zone-circle" style="width:50px;height:50px;">
+            <span class="material-symbols-outlined text-primary" style="font-size:18px;">payments</span>
+          </div>
+          <span class="zone-label">Finance</span>
+        </button>
+        <!-- Core -->
+        <div class="hub-core">
+          <div class="hub-core-ring"></div>
+          <div class="hub-core-ring"></div>
+          <div class="hub-core-ring"></div>
+          <div class="hub-core-center">
+            <div class="hub-count-num" id="hubCount">0</div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="mt-6 text-center">
-      <p class="font-label-sm text-label-sm text-outline uppercase tracking-[.2em]" id="hubDateLabel">—</p>
-      <p class="text-on-surface-variant text-sm mt-1" id="hubSubtitle">Loading…</p>
+    <div class="hub-sub">
+      <div class="hub-date" id="hubDateLabel">—</div>
+      <div class="hub-status" id="hubSubtitle">Loading…</div>
     </div>
-  </main>
+  </div>
 </div>
 
-<!-- ══ PANTRY ══ -->
-<div id="pantryScreen" class="screen min-h-screen relative z-10">
-  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
-    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
-      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
-      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+<!-- ══════════════════════════════════
+     PANTRY
+══════════════════════════════════ -->
+<div id="pantryScreen" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showTab('hub')">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back_ios</span> Hub
     </button>
-    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
-    <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center font-label-sm text-label-sm font-bold text-on-primary" id="pantryAvatar">—</div>
-  </header>
-  <main class="relative z-10 px-5 pt-8 pb-32 max-w-lg mx-auto entrance-sweep">
-    <div class="mb-10">
-      <div class="flex items-center gap-3 mb-2">
-        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">kitchen</span>
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">The Pantry</h1>
-      </div>
-      <p class="text-on-surface-variant text-sm">Tap any item to toggle availability.</p>
+    <div class="topbar-brand">ElRoof</div>
+    <div class="topbar-avatar" id="pantryAvatar">—</div>
+  </div>
+  <div style="padding:24px 18px 120px;max-width:520px;margin:0 auto;">
+    <div style="margin-bottom:24px;">
+      <h1 style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#e5e2e1;letter-spacing:-1px;margin-bottom:4px;">The Pantry</h1>
+      <p style="font-size:13px;color:rgba(230,212,168,.4);">Tap any item to toggle availability.</p>
     </div>
-    <section class="arched-top bg-surface-container-low p-6 pt-16 border border-primary/10 relative overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-28 bg-primary/5 blur-3xl rounded-full"></div>
-      <div class="space-y-6 relative z-10" id="pantryList"></div>
-    </section>
-  </main>
+    <div style="display:flex;flex-direction:column;gap:10px;" id="pantryList"></div>
+  </div>
 </div>
 
-<!-- ══ ARRIVALS ══ -->
-<div id="arrivalsScreen" class="screen min-h-screen relative z-10">
-  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
-    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
-      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
-      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+<!-- ══════════════════════════════════
+     ARRIVALS
+══════════════════════════════════ -->
+<div id="arrivalsScreen" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showTab('hub')">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back_ios</span> Hub
     </button>
-    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
-    <span class="material-symbols-outlined text-primary">sensors</span>
-  </header>
-  <main class="relative z-10 px-5 pt-8 pb-32 max-w-md mx-auto entrance-sweep">
-    <section class="mb-8 text-center">
-      <div class="font-display-lg text-display-lg text-primary mb-1" id="arrivalCount">0/9</div>
-      <div class="font-label-sm text-label-sm text-outline tracking-[.2em] uppercase">Total Presence</div>
-      <div class="dot-divider"><span class="material-symbols-outlined dot-divider-star text-sm">grade</span></div>
-    </section>
-    <section class="space-y-4" id="arrivalsList"></section>
-  </main>
+    <div class="topbar-brand">ElRoof</div>
+    <span class="material-symbols-outlined" style="color:rgba(230,212,168,.4);font-size:20px;">sensors</span>
+  </div>
+  <div style="padding:24px 18px 120px;max-width:480px;margin:0 auto;">
+    <div class="arrival-count-wrap">
+      <div class="arrival-count-num" id="arrivalCount">0/9</div>
+      <div class="arrival-count-label">On the roof today</div>
+      <div class="dot-divider" style="max-width:200px;margin:16px auto;"><span class="dot-divider-star">✦</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;" id="arrivalsList"></div>
+  </div>
 </div>
 
-<!-- ══ BROADCASTS ══ -->
-<div id="broadcastsScreen" class="screen min-h-screen relative z-10">
-  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
-    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
-      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
-      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+<!-- ══════════════════════════════════
+     BROADCASTS
+══════════════════════════════════ -->
+<div id="broadcastsScreen" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showTab('hub')">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back_ios</span> Hub
     </button>
-    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
-    <span class="material-symbols-outlined text-primary">sensors</span>
-  </header>
-  <main class="relative z-10 px-5 pt-8 pb-44 max-w-2xl mx-auto entrance-sweep">
-    <header class="mb-8">
-      <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-1">Broadcasts</h1>
-      <p class="text-on-surface-variant text-sm">Today's signals from the roof.</p>
-    </header>
-    <div id="broadcastDisplay" class="space-y-0"></div>
-  </main>
-  <section class="fixed bottom-[72px] left-0 w-full px-4 z-40" id="broadcastCompose">
-    <div class="max-w-2xl mx-auto bg-surface-container-low border border-x border-t border-primary/20 arched-top px-5 pt-8 pb-4 shadow-2xl backdrop-blur-xl">
-      <div class="flex items-center gap-3 mb-3">
-        <span class="material-symbols-outlined text-primary text-lg">stylus</span>
-        <p class="font-label-sm text-label-sm text-primary uppercase tracking-widest">Initiate Signal</p>
+    <div class="topbar-brand">ElRoof</div>
+    <span class="material-symbols-outlined" style="color:rgba(230,212,168,.4);font-size:20px;">sensors</span>
+  </div>
+  <div style="padding:24px 18px 200px;max-width:600px;margin:0 auto;">
+    <h1 style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#e6d4a8;letter-spacing:-1px;margin-bottom:4px;">Broadcasts</h1>
+    <p style="font-size:12px;color:rgba(230,212,168,.3);font-family:'JetBrains Mono',monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;">Today's signals</p>
+    <div id="broadcastDisplay" style="display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+  <!-- Compose -->
+  <div class="compose-bar" id="broadcastCompose" style="display:none;">
+    <div class="compose-inner">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span class="material-symbols-outlined" style="color:rgba(230,212,168,.4);font-size:16px;">stylus</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:rgba(230,212,168,.3);text-transform:uppercase;">Send a signal</span>
       </div>
-      <div class="relative">
-        <input id="bInput" type="text" placeholder="Transcribe your message…" class="w-full bg-transparent border-0 border-b-2 border-primary/30 py-3 text-on-surface placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-500 font-body-md text-body-md"/>
-        <button onclick="sendBroadcast()" class="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-primary active:scale-90 transition-transform">
-          <span class="material-symbols-outlined text-3xl">send</span>
+      <input id="bInput" type="text" placeholder="What's happening on the roof…" class="compose-input" autocomplete="off"/>
+      <div class="compose-divider"></div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="send-btn" onclick="sendBroadcast()">
+          <span class="material-symbols-outlined" style="font-size:18px;">send</span> Send
         </button>
       </div>
     </div>
-  </section>
+  </div>
 </div>
 
-<!-- ══ LEADERBOARD ══ -->
-<div id="leaderboardScreen" class="screen min-h-screen relative z-10">
-  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
-    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
-      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
-      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+<!-- ══════════════════════════════════
+     LEADERBOARD
+══════════════════════════════════ -->
+<div id="leaderboardScreen" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showTab('hub')">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back_ios</span> Hub
     </button>
-    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
-    <span class="material-symbols-outlined text-primary">emoji_events</span>
-  </header>
-  <main class="relative z-10 px-5 pt-8 pb-32 max-w-md mx-auto entrance-sweep">
-    <div class="mb-8">
-      <div class="flex items-center gap-3 mb-2">
-        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">emoji_events</span>
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Leaderboard</h1>
-      </div>
-      <p class="text-on-surface-variant text-sm">All-time roof visits. Updates every time someone marks an arrival.</p>
-    </div>
-    <div id="leaderboardList" class="space-y-3"></div>
-  </main>
+    <div class="topbar-brand">ElRoof</div>
+    <span class="material-symbols-outlined" style="color:rgba(230,212,168,.4);font-size:20px;">emoji_events</span>
+  </div>
+  <div style="padding:24px 18px 120px;max-width:480px;margin:0 auto;">
+    <h1 style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#e5e2e1;letter-spacing:-1px;margin-bottom:4px;">Leaderboard</h1>
+    <p style="font-size:13px;color:rgba(230,212,168,.4);margin-bottom:28px;">All-time roof visits. Never resets.</p>
+    <div id="podiumWrap" class="podium-wrap"></div>
+    <div style="display:flex;flex-direction:column;gap:8px;" id="leaderboardList"></div>
+  </div>
 </div>
 
-<!-- ══ FINANCE ══ -->
-<div id="financeScreen" class="screen min-h-screen relative z-10">
-  <header class="sticky top-0 z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-5 h-16">
-    <button onclick="showTab('hub')" class="flex items-center gap-1 text-on-surface-variant text-sm active:opacity-60">
-      <span class="material-symbols-outlined text-xl">arrow_back_ios</span>
-      <span class="font-label-sm text-label-sm uppercase tracking-widest">Hub</span>
+<!-- ══════════════════════════════════
+     FINANCE
+══════════════════════════════════ -->
+<div id="financeScreen" class="screen">
+  <div class="topbar">
+    <button class="topbar-back" onclick="showTab('hub')">
+      <span class="material-symbols-outlined" style="font-size:18px;">arrow_back_ios</span> Hub
     </button>
-    <span class="font-headline-md text-headline-md font-bold text-primary uppercase tracking-wider">ElRoof</span>
-    <button onclick="openFinanceModal()" class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary active:scale-90 transition-transform">
-      <span class="material-symbols-outlined text-xl">add</span>
+    <div class="topbar-brand">ElRoof</div>
+    <button onclick="openFinanceModal()" style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c9973a,#e6d4a8);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;" aria-label="Add expense">
+      <span class="material-symbols-outlined" style="font-size:18px;color:#0a0a0f;">add</span>
     </button>
-  </header>
-  <main class="relative z-10 px-5 pt-6 pb-32 max-w-md mx-auto entrance-sweep">
-    <div class="mb-6">
-      <div class="flex items-center gap-3 mb-2">
-        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">payments</span>
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Finance</h1>
-      </div>
-      <p class="text-on-surface-variant text-sm">Track shared expenses on the roof.</p>
-    </div>
-    <!-- My debts summary -->
-    <div class="bg-surface-container-low border border-primary/15 rounded-2xl p-5 mb-6" id="myDebtsSummary"></div>
-    <!-- All expenses -->
-    <div class="font-label-sm text-label-sm text-outline uppercase tracking-[.2em] mb-3">All Expenses</div>
-    <div id="expensesList" class="space-y-3"></div>
-  </main>
+  </div>
+  <div style="padding:20px 18px 120px;max-width:480px;margin:0 auto;">
+    <h1 style="font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:#e5e2e1;letter-spacing:-1px;margin-bottom:4px;">Finance</h1>
+    <p style="font-size:13px;color:rgba(230,212,168,.4);margin-bottom:20px;">Shared expenses on the roof.</p>
+    <div id="myDebtsSummary" class="debt-card"></div>
+    <div class="section-header">All Expenses</div>
+    <div style="display:flex;flex-direction:column;gap:10px;" id="expensesList"></div>
+  </div>
 </div>
 
-<!-- ══ BOTTOM NAV ══ -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-4 pt-2 bg-surface/90 backdrop-blur-xl rounded-t-xl border-t border-primary/10" id="bottomNav" style="display:none;">
-  <button onclick="showTab('hub')" id="nav-hub" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px]">
-    <span class="material-symbols-outlined text-xl">grid_view</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Hub</span>
+<!-- ══════════════════════════════════
+     BOTTOM NAV
+══════════════════════════════════ -->
+<nav class="bottom-nav" id="bottomNav" style="display:none;">
+  <button class="nav-btn ripple-host" id="nav-hub" onclick="showTab('hub')" aria-label="Hub">
+    <span class="material-symbols-outlined">grid_view</span>
+    <span class="nav-label">Hub</span>
   </button>
-  <button onclick="showTab('pantry')" id="nav-pantry" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px]">
-    <span class="material-symbols-outlined text-xl">kitchen</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Pantry</span>
+  <button class="nav-btn ripple-host" id="nav-pantry" onclick="showTab('pantry')" aria-label="Pantry">
+    <span class="material-symbols-outlined">kitchen</span>
+    <span class="nav-label">Pantry</span>
   </button>
-  <button onclick="showTab('arrivals')" id="nav-arrivals" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px]">
-    <span class="material-symbols-outlined text-xl">flight_land</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Arrivals</span>
+  <button class="nav-btn ripple-host" id="nav-arrivals" onclick="showTab('arrivals')" aria-label="Arrivals">
+    <span class="material-symbols-outlined">flight_land</span>
+    <span class="nav-label">Arrivals</span>
   </button>
-  <button onclick="showTab('broadcasts')" id="nav-broadcasts" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px]">
-    <span class="material-symbols-outlined text-xl">podcasts</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Signals</span>
+  <button class="nav-btn ripple-host" id="nav-broadcasts" onclick="showTab('broadcasts')" aria-label="Signals">
+    <span class="material-symbols-outlined">podcasts</span>
+    <span class="nav-label">Signals</span>
   </button>
-  <button onclick="showTab('leaderboard')" id="nav-leaderboard" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px]">
-    <span class="material-symbols-outlined text-xl">emoji_events</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Board</span>
+  <button class="nav-btn ripple-host" id="nav-leaderboard" onclick="showTab('leaderboard')" aria-label="Board">
+    <span class="material-symbols-outlined">emoji_events</span>
+    <span class="nav-label">Board</span>
   </button>
-  <button onclick="showTab('finance')" id="nav-finance" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px]">
-    <span class="material-symbols-outlined text-xl">payments</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Finance</span>
+  <button class="nav-btn ripple-host" id="nav-finance" onclick="showTab('finance')" aria-label="Finance">
+    <span class="material-symbols-outlined">payments</span>
+    <span class="nav-label">Finance</span>
   </button>
-  <button onclick="doLogout()" class="flex flex-col items-center justify-center p-2 text-outline transition-colors min-w-[44px] active:text-error">
-    <span class="material-symbols-outlined text-xl">logout</span>
-    <span class="font-label-sm mt-0.5" style="font-size:9px;">Leave</span>
+  <button class="nav-btn ripple-host" onclick="doLogout()" aria-label="Leave" style="color:rgba(255,100,100,.4);">
+    <span class="material-symbols-outlined">logout</span>
+    <span class="nav-label">Leave</span>
   </button>
 </nav>
 
-<!-- ══ TIME MODAL ══ -->
-<div class="time-modal-bg" id="timeModal" onclick="onModalBgClick(event)">
-  <div class="time-modal-sheet">
-    <h2 class="font-headline-md text-headline-md text-primary mb-1" id="modalName">—</h2>
-    <p class="font-label-sm text-label-sm text-outline uppercase tracking-widest mb-5">Arrival Schedule</p>
-    <div class="grid grid-cols-3 gap-2 mb-5 max-h-52 overflow-y-auto" id="timeGrid" style="-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
-    <div class="grid grid-cols-2 gap-3">
-      <button onclick="closeTimeModal()" class="py-4 text-sm font-bold text-primary border border-primary/30 rounded-xl active:bg-primary/10 transition-colors">Cancel</button>
-      <button onclick="confirmTime()" class="py-4 text-sm font-bold bg-primary text-on-primary rounded-xl active:opacity-80 transition-opacity">Confirm</button>
+<!-- ══════════════════════════════════
+     TIME MODAL
+══════════════════════════════════ -->
+<div class="modal-bg" id="timeModal" onclick="onModalBgClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#e6d4a8;margin-bottom:4px;" id="modalName">—</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:20px;">Set arrival time</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;max-height:220px;overflow-y:auto;" id="timeGrid"></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;">
+      <button class="action-btn-ghost" onclick="closeTimeModal()">Cancel</button>
+      <button class="action-btn-primary" onclick="confirmTime()" style="width:auto;">Confirm ↑</button>
     </div>
-    <button id="modalRemove" onclick="setNotComing()" style="display:none" class="w-full mt-3 py-3 font-label-sm text-label-sm text-error border border-error/20 rounded-xl active:bg-error/10 transition-colors uppercase tracking-widest">Remove Attendance</button>
+    <button id="modalRemove" onclick="setNotComing()" style="display:none;width:100%;margin-top:10px;padding:12px;background:transparent;border:1px solid rgba(255,100,100,.2);border-radius:12px;color:rgba(255,100,100,.6);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;min-height:44px;">
+      Remove attendance
+    </button>
   </div>
 </div>
 
-<!-- ══ FINANCE MODAL (add expense) ══ -->
+<!-- ══════════════════════════════════
+     FINANCE MODAL
+══════════════════════════════════ -->
 <div class="fin-modal-bg" id="finModal" onclick="onFinBgClick(event)">
   <div class="fin-sheet">
-    <h2 class="font-headline-md text-headline-md text-primary mb-1">New Expense</h2>
-    <p class="font-label-sm text-label-sm text-outline uppercase tracking-widest mb-6">Log what you paid for</p>
-
-    <div class="space-y-5">
-      <!-- Item name -->
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#e6d4a8;margin-bottom:4px;">New Expense</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:24px;">Log what you paid for</div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
       <div>
-        <label class="font-label-sm text-label-sm text-outline uppercase tracking-widest block mb-2">Item / Description</label>
-        <input id="finItem" type="text" placeholder="e.g. Ahwa, Shisha, Chips…"
-          class="w-full bg-surface-container-high border border-primary/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 outline-none transition-colors text-sm"/>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:8px;">Item / Description</div>
+        <input id="finItem" type="text" placeholder="e.g. Ahwa, Shisha, Chips…" class="fin-input" autocomplete="off"/>
       </div>
-      <!-- Amount -->
       <div>
-        <label class="font-label-sm text-label-sm text-outline uppercase tracking-widest block mb-2">Total Amount (EGP)</label>
-        <input id="finAmount" type="number" inputmode="decimal" placeholder="0"
-          class="w-full bg-surface-container-high border border-primary/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 outline-none transition-colors text-sm"/>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:8px;">Total Amount (EGP)</div>
+        <input id="finAmount" type="number" inputmode="decimal" placeholder="0" class="fin-input" autocomplete="off"/>
       </div>
-      <!-- Split type -->
       <div>
-        <label class="font-label-sm text-label-sm text-outline uppercase tracking-widest block mb-2">Split Method</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button id="splitEvenBtn" onclick="setSplitType('even')" class="py-3 rounded-xl border text-sm font-bold transition-all bg-primary/15 border-primary text-primary">Even Split</button>
-          <button id="splitCustomBtn" onclick="setSplitType('custom')" class="py-3 rounded-xl border border-outline-variant text-outline text-sm font-bold transition-all">Custom Split</button>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:8px;">Split Method</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button id="splitEvenBtn" onclick="setSplitType('even')" class="action-btn-primary" style="font-size:13px;padding:11px;">Even Split</button>
+          <button id="splitCustomBtn" onclick="setSplitType('custom')" class="action-btn-ghost" style="font-size:13px;">Custom</button>
         </div>
       </div>
-      <!-- Who to split with -->
       <div>
-        <label class="font-label-sm text-label-sm text-outline uppercase tracking-widest block mb-2">Split With</label>
-        <div class="grid grid-cols-3 gap-2" id="finMemberGrid"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:8px;">Split With</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;" id="finMemberGrid"></div>
       </div>
-      <!-- Custom amounts (shown only in custom mode) -->
       <div id="customAmountsWrap" style="display:none;">
-        <label class="font-label-sm text-label-sm text-outline uppercase tracking-widest block mb-2">Custom Amounts (EGP)</label>
-        <div id="customAmountsList" class="space-y-2"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(230,212,168,.3);text-transform:uppercase;margin-bottom:8px;">Custom Amounts (EGP)</div>
+        <div id="customAmountsList" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
-      <!-- Submit -->
-      <button onclick="submitExpense()" class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold text-sm active:opacity-80 transition-opacity mt-2">Add Expense</button>
+      <button onclick="submitExpense()" class="action-btn-primary">Add Expense</button>
     </div>
   </div>
 </div>
 
-<!-- ══ FIREBASE ══ -->
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
@@ -415,17 +667,73 @@ boot();
 </script>
 
 <script>
+/* ══ ANIMATED BACKGROUND ══ */
+(function(){
+  const canvas=document.getElementById('bgCanvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();
+  window.addEventListener('resize',resize);
+  for(let i=0;i<60;i++){
+    particles.push({
+      x:Math.random()*W,y:Math.random()*H,
+      r:Math.random()*1.2+.3,
+      vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15,
+      o:Math.random()*.4+.05,
+      pulse:Math.random()*Math.PI*2
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const t=Date.now()*.001;
+    particles.forEach(p=>{
+      p.pulse+=.015;
+      const alpha=p.o*(0.6+0.4*Math.sin(p.pulse));
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(230,212,168,${alpha})`;
+      ctx.fill();
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    });
+    // Subtle ambient gradient
+    const grad=ctx.createRadialGradient(W*.5,H*.4,.1,W*.5,H*.4,W*.6);
+    grad.addColorStop(0,'rgba(60,50,80,.04)');
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,W,H);
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══ RIPPLE ══ */
+document.addEventListener('pointerdown',e=>{
+  const host=e.target.closest('.ripple-host');
+  if(!host)return;
+  const r=document.createElement('span');
+  r.className='ripple';
+  const rect=host.getBoundingClientRect();
+  const size=Math.max(rect.width,rect.height)*2;
+  r.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px;`;
+  host.appendChild(r);
+  setTimeout(()=>r.remove(),600);
+});
+
 /* ══ DATA ══ */
-const MEMBERS=['Hassan','Ahmed','Marwan','Malek','Zeyad','Yassin','Loay','Seif','Omar'];
+const MEMBERS=['hassan','ahmed','marwan','malek','zeyad','yassin','loay','seif','omar'];
 const ITEMS=[
-  {k:'sagayer',l:'Sagayer',icon:'inventory_2',sub:'Premium Selection'},
-  {k:'ahwa',   l:'Ahwa',   icon:'coffee',      sub:'Dark Roasted'},
-  {k:'sokar',  l:'Sokar',  icon:'grain',       sub:'Fine Crystals'},
-  {k:'shay',   l:'Shay',   icon:'energy_savings_leaf',sub:'Black Leaf'},
+  {k:'sagayer',l:'Sagayer',e:'🚬',sub:'Premium Selection'},
+  {k:'ahwa',   l:'Ahwa',   e:'☕',sub:'Dark Roasted'},
+  {k:'sokar',  l:'Sokar',  e:'🍬',sub:'Fine Crystals'},
+  {k:'shay',   l:'Shay',   e:'🍵',sub:'Black Leaf'},
 ];
 const TIMES=['10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM','9:00 PM','10:00 PM'];
 
-let me=null,selIdx=null,selTime=null,modalIdx=null,unsub=null,unsubLb=null,unsubFin=null;
+let me=null,selIdx=null,selTime=null,modalIdx=null;
+let unsub=null,unsubLb=null,unsubFin=null;
 let state={},leaderboard={},finances={};
 let splitType='even',finSelMembers=new Set();
 
@@ -436,7 +744,7 @@ function deleteCookie(n){document.cookie=n+'=;expires=Thu, 01 Jan 1970 00:00:00 
 
 /* ══ BOOT ══ */
 async function boot(){
-  await new Promise(r=>setTimeout(r,1200));
+  await new Promise(r=>setTimeout(r,1600));
   document.getElementById('loader').classList.add('gone');
   const saved=getCookie('elroof_member');
   if(saved!==null){const idx=parseInt(saved);if(idx>=0&&idx<MEMBERS.length){me=idx;enterMain();return;}}
@@ -449,15 +757,13 @@ function buildLogin(){
   const g=document.getElementById('loginGrid');g.innerHTML='';
   MEMBERS.forEach((name,i)=>{
     const b=document.createElement('button');
-    b.className='py-3 px-2 bg-surface-container-high border border-primary/15 rounded-xl text-on-surface-variant text-sm font-medium transition-all active:scale-95';
-    b.textContent=name;
+    b.className='mbtn ripple-host';b.textContent=name;
     b.onclick=()=>{
       selIdx=i;
       document.getElementById('lerr').textContent='';
       document.getElementById('loginBtn').disabled=false;
-      document.querySelectorAll('#loginGrid button').forEach(x=>{x.classList.remove('bg-primary','text-on-primary','border-primary');x.classList.add('bg-surface-container-high','text-on-surface-variant','border-primary/15');});
-      b.classList.remove('bg-surface-container-high','text-on-surface-variant','border-primary/15');
-      b.classList.add('bg-primary','text-on-primary','border-primary');
+      document.querySelectorAll('.mbtn').forEach(x=>{x.classList.remove('sel');});
+      b.classList.add('sel');
     };
     g.appendChild(b);
   });
@@ -469,7 +775,7 @@ function doLogout(){
   me=null;selIdx=null;
   document.getElementById('loginBtn').disabled=true;
   document.getElementById('bottomNav').style.display='none';
-  ['hubScreen','pantryScreen','arrivalsScreen','broadcastsScreen','leaderboardScreen','financeScreen'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  ALL_TABS.forEach(t=>document.getElementById(t+'Screen').classList.remove('active'));
   buildLogin();
   document.getElementById('loginScreen').classList.add('active');
 }
@@ -481,35 +787,37 @@ function enterMain(){
   const initials=MEMBERS[me].slice(0,2).toUpperCase();
   document.getElementById('hubAvatar').textContent=initials;
   document.getElementById('pantryAvatar').textContent=initials;
-  const now=new Date();
-  document.getElementById('hubDateLabel').textContent=now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  document.getElementById('hubDateLabel').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   document.getElementById('bottomNav').style.display='flex';
   showTab('hub');
-  subscribeState();
-  subscribeLeaderboard();
-  subscribeFinances();
+  subscribeState();subscribeLeaderboard();subscribeFinances();
 }
 
-/* ══ TAB NAVIGATION ══ */
+/* ══ TABS ══ */
 const ALL_TABS=['hub','pantry','arrivals','broadcasts','leaderboard','finance'];
+let prevTab=null;
 function showTab(tab){
   ALL_TABS.forEach(t=>{
-    document.getElementById(t+'Screen').classList.remove('active');
+    const el=document.getElementById(t+'Screen');
+    el.classList.remove('active','screen-enter');
     const nb=document.getElementById('nav-'+t);
-    if(nb){nb.classList.remove('bg-primary-container','text-on-primary-container','rounded-full','px-sm','py-xs','scale-90');nb.classList.add('text-outline');}
+    if(nb)nb.classList.remove('active');
   });
-  document.getElementById(tab+'Screen').classList.add('active');
-  const activeBtn=document.getElementById('nav-'+tab);
-  if(activeBtn){activeBtn.classList.remove('text-outline');activeBtn.classList.add('bg-primary-container','text-on-primary-container','rounded-full','px-sm','py-xs','scale-90');}
+  const el=document.getElementById(tab+'Screen');
+  el.classList.add('active');
+  // Trigger entrance animation
+  requestAnimationFrame(()=>{el.classList.add('screen-enter');});
+  const nb=document.getElementById('nav-'+tab);
+  if(nb)nb.classList.add('active');
   document.getElementById('broadcastCompose').style.display=tab==='broadcasts'?'block':'none';
+  prevTab=tab;
 }
 
-/* ══ FIREBASE HELPERS ══ */
+/* ══ FIREBASE ══ */
 function today(){return new Date().toISOString().split('T')[0];}
 function dbRef(p){return window._ref(window._db,p);}
 async function write(path,val){await window._set(dbRef(path),val);}
 
-/* ══ SUBSCRIBE: Daily state ══ */
 function subscribeState(){
   if(unsub)unsub();
   unsub=window._onValue(dbRef(`days/${today()}`),snap=>{
@@ -519,48 +827,69 @@ function subscribeState(){
     renderAll();
   });
 }
-
-/* ══ SUBSCRIBE: Leaderboard (persistent, not date-keyed) ══ */
 function subscribeLeaderboard(){
   if(unsubLb)unsubLb();
-  unsubLb=window._onValue(dbRef('leaderboard'),snap=>{
-    leaderboard=snap.val()||{};
-    renderLeaderboard();
-  });
+  unsubLb=window._onValue(dbRef('leaderboard'),snap=>{leaderboard=snap.val()||{};renderLeaderboard();});
 }
-
-/* ══ SUBSCRIBE: Finances (persistent) ══ */
 function subscribeFinances(){
   if(unsubFin)unsubFin();
-  unsubFin=window._onValue(dbRef('finances'),snap=>{
-    finances=snap.val()||{};
-    renderFinance();
-  });
+  unsubFin=window._onValue(dbRef('finances'),snap=>{finances=snap.val()||{};renderFinance();});
 }
 
 /* ══ RENDER ALL ══ */
 function renderAll(){renderHub();renderPantry();renderArrivals();renderBroadcast();}
 
+/* ══ HUB ══ */
+let prevHubCount=-1;
 function renderHub(){
   const coming=state.coming||{};
   const count=Object.values(coming).filter(Boolean).length;
-  document.getElementById('hubCount').textContent=count;
-  document.getElementById('hubSubtitle').textContent=count===0?'No one on the roof yet':count===1?'1 member on the roof':`${count} members on the roof`;
+  const el=document.getElementById('hubCount');
+  if(count!==prevHubCount&&prevHubCount>=0){el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');}
+  el.textContent=count;prevHubCount=count;
+  document.getElementById('hubSubtitle').textContent=count===0?'No one on the roof yet':count===1?'1 member heading up':`${count} members on the roof`;
+  // Update badges
+  const bA=document.getElementById('badge-arrivals');
+  if(bA){bA.textContent=count>0?count:'';bA.classList.toggle('show',count>0);}
+  const bB=document.getElementById('badge-broadcasts');
+  const bc=(state.broadcasts||[]).length;
+  if(bB){bB.textContent=bc>0?bc:'';bB.classList.toggle('show',bc>0);}
+  // Pantry badge — count unavailable items
+  const bP=document.getElementById('badge-pantry');
+  const unavail=ITEMS.filter(it=>(state.items||{})[it.k]==='not available').length;
+  if(bP){bP.textContent=unavail>0?unavail:'';bP.classList.toggle('show',unavail>0);}
 }
 
+/* ══ PANTRY ══ */
 function renderPantry(){
   const items=state.items||{};
   const l=document.getElementById('pantryList');l.innerHTML='';
   ITEMS.forEach((it,idx)=>{
-    if(idx>0){const d=document.createElement('div');d.className='dot-divider';d.innerHTML='<span class="dot-divider-star material-symbols-outlined text-sm">grade</span>';l.appendChild(d);}
     const on=items[it.k]==='available';
-    const wrap=document.createElement('div');
-    wrap.className='arched-top bg-surface-container-high p-6 flex flex-col gap-5';
-    wrap.innerHTML=`<div class="flex justify-between items-start"><div><h3 class="font-headline-md text-headline-md text-primary">${it.l}</h3><p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-tighter mt-1">${it.sub}</p></div><span class="material-symbols-outlined text-outline">${it.icon}</span></div><div class="flex justify-between items-center"><span class="text-on-surface-variant text-sm">${on?'Stocked':'Empty'}</span><label class="toggle-wrap"><input type="checkbox" class="toggle-input" ${on?'checked':''} onchange="toggleItem('${it.k}')"/><span class="toggle-track"></span></label></div>`;
-    l.appendChild(wrap);
+    const card=document.createElement('div');
+    card.className='item-card ripple-host'+(on?' avail':'');
+    card.style.animationDelay=`${idx*60}ms`;
+    card.onclick=()=>toggleItem(it.k);
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="item-icon-wrap ${on?'on':'off'}">${it.e}</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:${on?'#e5e2e1':'rgba(230,212,168,.4)'};">${it.l}</div>
+          <div style="font-size:11px;color:rgba(230,212,168,.3);margin-top:2px;">${it.sub}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="item-pill ${on?'on':'off'}">${on?'✓ Here':'✗ None'}</span>
+        <label class="toggle-wrap" onclick="event.stopPropagation()">
+          <input type="checkbox" class="toggle-input" ${on?'checked':''} onchange="toggleItem('${it.k}')"/>
+          <span class="toggle-track"></span>
+        </label>
+      </div>`;
+    l.appendChild(card);
   });
 }
 
+/* ══ ARRIVALS ══ */
 function renderArrivals(){
   const coming=state.coming||{};
   const count=Object.values(coming).filter(Boolean).length;
@@ -569,94 +898,146 @@ function renderArrivals(){
   MEMBERS.forEach((name,i)=>{
     const isSelf=i===me,time=coming[i];
     const card=document.createElement('div');
-    card.className='member-row arched-top bg-surface-container-high p-5 flex items-center justify-between cursor-pointer'+(time?' here':'');
-    if(isSelf||!time)card.onclick=()=>openTimeModal(i,!!time);
+    card.className='member-card ripple-host'+(isSelf?' self':'')+(time?' here':'');
+    card.style.animation=`staggerIn .4s ease ${i*40}ms both`;
+    if(isSelf)card.onclick=()=>openTimeModal(i,!!time);
     const initials=name.slice(0,2).toUpperCase();
-    card.innerHTML=`<div class="flex items-center gap-4"><div class="w-11 h-11 rounded-full border-2 ${time?'border-primary/30':'border-outline/20'} flex items-center justify-center bg-surface-container text-sm font-bold ${time?'text-primary':'text-outline'}">${initials}</div><div><h3 class="text-sm font-bold ${time?'text-primary':'text-on-surface-variant'}">${name}</h3><p class="font-label-sm text-label-sm ${time?'text-outline':'text-outline-variant'}">${time||'Not yet set'}</p></div></div><div>${time?`<span class="px-3 py-1 bg-primary text-on-primary rounded-full text-[10px] font-bold uppercase tracking-wider">Coming</span>`:`<span class="px-3 py-1 border border-outline-variant text-outline-variant rounded-full text-[10px] font-bold uppercase tracking-wider">${isSelf?'Tap to set':'Awaiting'}</span>`}</div>`;
+    let avClass='mem-av '+(time?'here-av':isSelf?'self-av':'default');
+    let badge=time
+      ?`<span class="mem-badge coming">${time}</span>`
+      :`<span class="mem-badge ${isSelf?'tap':'waiting'}">${isSelf?'Tap to set':'Awaiting'}</span>`;
+    card.innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="${avClass}">${initials}</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:${time?'#e6d4a8':isSelf?'#e6d4a8':'rgba(230,212,168,.4)'};">${name}${isSelf?` <span style="font-size:10px;color:rgba(230,212,168,.3);">(you)</span>`:''}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(230,212,168,.3);margin-top:2px;">${time||'—'}</div>
+        </div>
+      </div>
+      ${badge}`;
     l.appendChild(card);
   });
 }
 
+/* ══ BROADCASTS ══ */
 function renderBroadcast(){
   const broadcasts=state.broadcasts||[];
-  const container=document.getElementById('broadcastDisplay');
-  if(broadcasts.length===0){container.innerHTML=`<div class="relative pl-10"><div class="absolute left-0 top-2 w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center border border-primary/20"><span class="material-symbols-outlined text-primary" style="font-size:16px;">podcasts</span></div><div class="bg-surface-container-high p-5 rounded-xl border border-primary/10"><p class="text-on-surface-variant text-sm italic">Nothing broadcast yet today.</p></div></div>`;return;}
-  container.innerHTML='';
+  const container=document.getElementById('broadcastDisplay');container.innerHTML='';
+  if(broadcasts.length===0){
+    container.innerHTML=`<div class="signal-card" style="padding:24px;text-align:center;"><div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(230,212,168,.2);letter-spacing:2px;text-transform:uppercase;">No signals today</div></div>`;return;
+  }
   const icons=['podcasts','campaign','record_voice_over','spatial_audio','hearing'];
   broadcasts.forEach((b,idx)=>{
-    const el=document.createElement('div');el.className='relative pl-10 mb-5';
-    el.innerHTML=`<div class="absolute left-0 top-2 w-8 h-8 bg-surface-container-high rounded-full flex items-center justify-center border border-primary/20"><span class="material-symbols-outlined text-primary" style="font-size:16px;">${icons[idx%icons.length]}</span></div><div class="bg-surface-container-high p-5 rounded-xl border border-primary/10"><div class="flex justify-between items-center mb-2"><span class="font-label-sm text-label-sm text-primary tracking-widest uppercase">${esc(b.from)}</span><span class="font-label-sm text-label-sm text-outline opacity-60">${fmtTime(b.ts)}</span></div><p class="text-on-surface text-sm leading-relaxed">${esc(b.text)}</p></div>`;
+    const el=document.createElement('div');
+    el.className='signal-card';
+    el.style.animation=`staggerIn .4s ease ${idx*60}ms both`;
+    el.innerHTML=`
+      <div style="display:flex;gap:12px;">
+        <div class="signal-icon">
+          <span class="material-symbols-outlined" style="font-size:14px;color:rgba(230,212,168,.6);">${icons[idx%icons.length]}</span>
+        </div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#e6d4a8;letter-spacing:2px;text-transform:uppercase;">${esc(b.from)}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(230,212,168,.25);">${fmtTime(b.ts)}</span>
+          </div>
+          <div style="font-size:14px;color:#e5e2e1;line-height:1.6;">${esc(b.text)}</div>
+        </div>
+      </div>`;
     container.appendChild(el);
   });
 }
 
-/* ══ LEADERBOARD RENDER ══ */
+/* ══ LEADERBOARD ══ */
 function renderLeaderboard(){
-  const list=document.getElementById('leaderboardList');list.innerHTML='';
   const sorted=MEMBERS.map((name,i)=>({name,i,count:leaderboard[i]||0})).sort((a,b)=>b.count-a.count);
-  const medals=['🥇','🥈','🥉'];
-  sorted.forEach((m,rank)=>{
+  // Podium top 3
+  const podium=document.getElementById('podiumWrap');podium.innerHTML='';
+  const podiumOrder=[1,0,2];// 2nd, 1st, 3rd
+  const podiumColors=['#C0C0C0','#FFD700','#CD7F32'];
+  const podiumH=[48,72,32];
+  const podiumAv=[54,68,54];
+  podiumOrder.forEach((rankIdx,col)=>{
+    const m=sorted[rankIdx];if(!m)return;
+    const medals=['🥇','🥈','🥉'];
+    const div=document.createElement('div');
+    div.className='podium-col';
+    div.style.animation=`staggerIn .5s ease ${col*100}ms both`;
+    div.innerHTML=`
+      <div style="font-size:${col===1?'28':'22'}px;">${medals[rankIdx]}</div>
+      <div class="podium-av" style="width:${podiumAv[col]}px;height:${podiumAv[col]}px;background:rgba(255,255,255,.05);border:2px solid ${podiumColors[rankIdx]};font-size:${col===1?'16':'13'}px;color:${podiumColors[rankIdx]};box-shadow:0 0 20px ${podiumColors[rankIdx]}30;">${m.name.slice(0,2).toUpperCase()}</div>
+      <div style="font-size:${col===1?'13':'11'}px;font-weight:700;color:${podiumColors[rankIdx]};">${m.name}</div>
+      <div style="font-family:'Syne',sans-serif;font-size:${col===1?'24':'18'}px;font-weight:800;color:${podiumColors[rankIdx]};">${m.count}</div>
+      <div style="font-size:9px;color:rgba(230,212,168,.25);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;">visits</div>
+      <div class="podium-base" style="height:${podiumH[col]}px;background:rgba(255,255,255,.04);border:1px solid ${podiumColors[rankIdx]}25;"></div>`;
+    podium.appendChild(div);
+  });
+  // Rest of list
+  const list=document.getElementById('leaderboardList');list.innerHTML='';
+  sorted.slice(3).forEach((m,idx)=>{
     const isMe=m.i===me;
-    const card=document.createElement('div');
-    card.className=`bg-surface-container-high border ${isMe?'border-primary/40':'border-primary/10'} rounded-2xl p-4 flex items-center gap-4`;
-    const medal=rank<3?`<span class="text-2xl">${medals[rank]}</span>`:`<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-label-sm text-label-sm text-outline">${rank+1}</span>`;
-    card.innerHTML=`${medal}<div class="flex-1"><div class="font-bold text-sm ${isMe?'text-primary':'text-on-surface'}">${m.name}${isMe?' <span class="font-label-sm text-[9px] text-outline">(you)</span>':''}</div><div class="font-label-sm text-label-sm text-outline mt-0.5">${m.count} visit${m.count===1?'':'s'}</div></div><div class="font-display-lg text-xl font-bold ${rank===0?'text-yellow-400':rank===1?'text-gray-300':rank===2?'text-amber-600':'text-outline'}">${m.count}</div>`;
-    list.appendChild(card);
+    const row=document.createElement('div');
+    row.className='lb-row'+(isMe?' lb-me':'');
+    row.style.animation=`staggerIn .4s ease ${(idx+3)*50}ms both`;
+    row.innerHTML=`
+      <span class="lb-rank-num">${idx+4}</span>
+      <div class="lb-av-sm" style="${isMe?'border-color:rgba(230,212,168,.3);color:#e6d4a8;background:rgba(230,212,168,.06);':''}">${m.name.slice(0,2).toUpperCase()}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:700;color:${isMe?'#e6d4a8':'rgba(230,212,168,.6)'};">${m.name}${isMe?' <span style="font-size:10px;color:rgba(230,212,168,.3);">(you)</span>':''}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(230,212,168,.25);margin-top:2px;">${m.count} visit${m.count===1?'':'s'}</div>
+      </div>
+      <div class="lb-count">${m.count}</div>`;
+    list.appendChild(row);
   });
 }
 
-/* ══ FINANCE RENDER ══ */
+/* ══ FINANCE ══ */
 function renderFinance(){
-  // Calculate what I owe and to whom
   const expArr=Object.entries(finances).map(([id,e])=>({id,...e}));
-  let myOwed=[];// {from, item, amount, expId, paid}
+  let myOwed=[];
   expArr.forEach(exp=>{
-    if(exp.paidBy===me)return;// skip my own
-    const split=exp.splits||{};
-    const myShare=split[me];
+    if(exp.paidBy===me)return;
+    const myShare=(exp.splits||{})[me];
     if(!myShare||myShare.amount<=0)return;
     myOwed.push({from:exp.paidBy,item:exp.item,amount:myShare.amount,expId:exp.id,paid:myShare.paid||false});
   });
-
-  // My debts summary card
   const summaryEl=document.getElementById('myDebtsSummary');
   const totalOwed=myOwed.filter(x=>!x.paid).reduce((s,x)=>s+x.amount,0);
-  if(myOwed.length===0){
-    summaryEl.innerHTML=`<div class="font-label-sm text-label-sm text-outline uppercase tracking-widest mb-1">You owe</div><div class="font-display-lg text-2xl font-bold text-primary">Nothing 🎉</div><div class="text-on-surface-variant text-xs mt-1">You're all settled up.</div>`;
+  if(myOwed.length===0||totalOwed===0){
+    summaryEl.className='debt-card clear';
+    summaryEl.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(100,200,130,.5);text-transform:uppercase;margin-bottom:8px;">You owe</div><div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#6dc87a;">All settled ✓</div><div style="font-size:12px;color:rgba(100,200,130,.4);margin-top:4px;">You're good. Nothing pending.</div>`;
   } else {
     const byPerson={};
     myOwed.filter(x=>!x.paid).forEach(x=>{byPerson[x.from]=(byPerson[x.from]||0)+x.amount;});
-    const rows=Object.entries(byPerson).map(([idx,amt])=>`<div class="flex justify-between text-sm mt-2"><span class="text-on-surface-variant">${MEMBERS[idx]}</span><span class="text-primary font-bold">${amt.toFixed(0)} EGP</span></div>`).join('');
-    summaryEl.innerHTML=`<div class="font-label-sm text-label-sm text-outline uppercase tracking-widest mb-2">You owe</div><div class="font-bold text-2xl text-error mb-3">${totalOwed.toFixed(0)} EGP</div>${rows}`;
+    const rows=Object.entries(byPerson).map(([idx,amt])=>`<div style="display:flex;justify-content:space-between;margin-top:8px;"><span style="font-size:13px;color:rgba(255,150,150,.6);">→ ${MEMBERS[idx]}</span><span style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#ffb4ab;">${amt.toFixed(0)} EGP</span></div>`).join('');
+    summaryEl.className='debt-card owe';
+    summaryEl.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,100,100,.5);text-transform:uppercase;margin-bottom:8px;">You owe</div><div style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#ffb4ab;margin-bottom:4px;">${totalOwed.toFixed(0)} <span style="font-size:18px;">EGP</span></div>${rows}`;
   }
-
-  // All expenses list
   const listEl=document.getElementById('expensesList');listEl.innerHTML='';
-  if(expArr.length===0){listEl.innerHTML='<p class="text-on-surface-variant text-sm italic text-center py-6">No expenses logged yet. Tap + to add one.</p>';return;}
-
-  expArr.sort((a,b)=>(b.ts||0)-(a.ts||0)).forEach(exp=>{
+  if(expArr.length===0){listEl.innerHTML='<div style="text-align:center;padding:32px 0;font-family:JetBrains Mono,monospace;font-size:11px;color:rgba(230,212,168,.2);letter-spacing:2px;text-transform:uppercase;">No expenses yet. Tap + to add one.</div>';return;}
+  expArr.sort((a,b)=>(b.ts||0)-(a.ts||0)).forEach((exp,idx)=>{
     const isMine=exp.paidBy===me;
     const splits=exp.splits||{};
     const card=document.createElement('div');
-    card.className='bg-surface-container-high border border-primary/10 rounded-2xl p-4';
-    const splitRows=Object.entries(splits).map(([idx,s])=>{
+    card.className='exp-card'+(isMine?' mine':'');
+    card.style.animation=`staggerIn .4s ease ${idx*50}ms both`;
+    const splitRows=Object.entries(splits).map(([i,s])=>{
       const paid=s.paid||false;
-      const canMark=isMine&&parseInt(idx)!==me;
-      return `<div class="flex items-center justify-between text-xs mt-2">
-        <span class="${paid?'text-outline line-through':'text-on-surface-variant'}">${MEMBERS[idx]}</span>
-        <div class="flex items-center gap-2">
-          <span class="${paid?'text-outline':'text-primary'} font-bold">${s.amount.toFixed(0)} EGP</span>
-          ${canMark?`<button onclick="markPaid('${exp.id}',${idx})" class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border transition-all ${paid?'border-outline text-outline':'border-green-600 text-green-500 active:bg-green-900'}">${paid?'Paid':'Mark paid'}</button>`:`<span class="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${paid?'bg-green-900/30 text-green-500':'bg-surface-container text-outline'}">${paid?'✓ Paid':'Pending'}</span>`}
+      const canMark=isMine&&parseInt(i)!==me;
+      return `<div class="split-row">
+        <span style="font-size:13px;color:${paid?'rgba(230,212,168,.25)':'rgba(230,212,168,.6)'};${paid?'text-decoration:line-through;':''}">${MEMBERS[i]}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:${paid?'rgba(230,212,168,.25)':'#e6d4a8'};">${s.amount.toFixed(0)} EGP</span>
+          ${canMark?`<button onclick="markPaid('${exp.id}',${i})" style="padding:3px 10px;background:${paid?'rgba(255,255,255,.04)':'rgba(100,200,130,.1)'};border:1px solid ${paid?'rgba(255,255,255,.06)':'rgba(100,200,130,.25)'};border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:${paid?'rgba(230,212,168,.25)':'#6dc87a'};letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;min-height:26px;">${paid?'✓ Paid':'Mark paid'}</button>`:`<span style="padding:3px 10px;background:${paid?'rgba(100,200,130,.08)':'rgba(255,255,255,.03)'};border:1px solid ${paid?'rgba(100,200,130,.2)':'rgba(255,255,255,.06)'};border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:${paid?'#6dc87a':'rgba(230,212,168,.25)'};letter-spacing:1px;text-transform:uppercase;">${paid?'✓ Paid':'Pending'}</span>`}
         </div>
       </div>`;
     }).join('');
-
     card.innerHTML=`
-      <div class="flex justify-between items-start mb-2">
-        <div><div class="font-bold text-sm text-on-surface">${esc(exp.item)}</div><div class="font-label-sm text-label-sm text-outline mt-0.5">${MEMBERS[exp.paidBy]} paid · ${fmtTime(exp.ts)}</div></div>
-        <div class="text-right"><div class="font-bold text-primary text-sm">${exp.total.toFixed(0)} EGP</div>${isMine?'<div class="font-label-sm text-[9px] text-outline">your expense</div>':''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div><div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#e5e2e1;">${esc(exp.item)}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(230,212,168,.25);margin-top:3px;">${MEMBERS[exp.paidBy]} paid · ${fmtTime(exp.ts)}</div></div>
+        <div style="text-align:right;"><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#e6d4a8;">${exp.total.toFixed(0)} EGP</div>${isMine?'<div style="font-family:JetBrains Mono,monospace;font-size:9px;color:rgba(230,212,168,.25);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">your expense</div>':''}</div>
       </div>
-      <div class="border-t border-primary/10 pt-2">${splitRows}</div>`;
+      <div style="border-top:1px solid rgba(255,255,255,.04);padding-top:8px;">${splitRows}</div>`;
     listEl.appendChild(card);
   });
 }
@@ -679,24 +1060,19 @@ function openTimeModal(idx,alreadyHere){
 }
 function closeTimeModal(){document.getElementById('timeModal').classList.remove('open');}
 function onModalBgClick(e){if(e.target===document.getElementById('timeModal'))closeTimeModal();}
-
 async function confirmTime(){
   if(!selTime){showToast('Pick a time first','gold');return;}
-  const wasAlreadyComing=!!state.coming?.[modalIdx];
+  const wasNew=!state.coming?.[modalIdx];
   await write(`days/${today()}/coming/${modalIdx}`,selTime);
-  // Only increment leaderboard if this is a new arrival (not an update)
-  if(!wasAlreadyComing){
-    const cur=leaderboard[modalIdx]||0;
-    await write(`leaderboard/${modalIdx}`,cur+1);
-  }
-  closeTimeModal();showToast(`See you at ${selTime} ☀️`,'green');
+  if(wasNew){const cur=leaderboard[modalIdx]||0;await write(`leaderboard/${modalIdx}`,cur+1);}
+  closeTimeModal();showToast(`See you at ${selTime} ✓`,'green');
 }
 async function setNotComing(){
   await write(`days/${today()}/coming/${modalIdx}`,null);
   closeTimeModal();showToast('Removed from today','');
 }
 
-/* ══ TOGGLE ITEM ══ */
+/* ══ ITEMS ══ */
 async function toggleItem(k){
   const cur=state.items?.[k]??'available';
   const next=cur==='available'?'not available':'available';
@@ -709,7 +1085,7 @@ async function sendBroadcast(){
   const inp=document.getElementById('bInput');const txt=inp.value.trim();if(!txt)return;
   const existing=state.broadcasts||[];
   await write(`days/${today()}/broadcasts`,[...existing,{text:txt,from:MEMBERS[me],ts:Date.now()}]);
-  inp.value='';showToast('Broadcast sent!','gold');
+  inp.value='';showToast('Signal sent!','gold');
 }
 
 /* ══ FINANCE MODAL ══ */
@@ -718,21 +1094,20 @@ function openFinanceModal(){
   document.getElementById('finItem').value='';
   document.getElementById('finAmount').value='';
   document.getElementById('customAmountsWrap').style.display='none';
-  setSplitType('even');
-  buildFinMemberGrid();
+  setSplitType('even');buildFinMemberGrid();
   document.getElementById('finModal').classList.add('open');
 }
 function closeFinModal(){document.getElementById('finModal').classList.remove('open');}
 function onFinBgClick(e){if(e.target===document.getElementById('finModal'))closeFinModal();}
-
 function setSplitType(type){
   splitType=type;
-  document.getElementById('splitEvenBtn').className=`py-3 rounded-xl border text-sm font-bold transition-all ${type==='even'?'bg-primary/15 border-primary text-primary':'border-outline-variant text-outline'}`;
-  document.getElementById('splitCustomBtn').className=`py-3 rounded-xl border text-sm font-bold transition-all ${type==='custom'?'bg-primary/15 border-primary text-primary':'border-outline-variant text-outline'}`;
+  document.getElementById('splitEvenBtn').className=type==='even'?'action-btn-primary':'action-btn-ghost';
+  document.getElementById('splitCustomBtn').className=type==='custom'?'action-btn-primary':'action-btn-ghost';
+  document.getElementById('splitEvenBtn').style='font-size:13px;padding:11px;'+(type==='even'?'width:auto;':'');
+  document.getElementById('splitCustomBtn').style='font-size:13px;'+(type==='custom'?'width:auto;':'');
   document.getElementById('customAmountsWrap').style.display=type==='custom'?'block':'none';
   if(type==='custom')buildCustomAmounts();
 }
-
 function buildFinMemberGrid(){
   const g=document.getElementById('finMemberGrid');g.innerHTML='';
   MEMBERS.forEach((name,i)=>{
@@ -748,47 +1123,35 @@ function buildFinMemberGrid(){
     g.appendChild(b);
   });
 }
-
 function buildCustomAmounts(){
   const total=parseFloat(document.getElementById('finAmount').value)||0;
   const wrap=document.getElementById('customAmountsList');wrap.innerHTML='';
-  // include self
-  const all=[me,...Array.from(finSelMembers)];
-  all.forEach(i=>{
-    const row=document.createElement('div');row.className='flex items-center gap-2';
-    row.innerHTML=`<span class="text-on-surface-variant text-sm w-20 flex-shrink-0">${MEMBERS[i]}${i===me?' (you)':''}</span><input id="ca-${i}" type="number" inputmode="decimal" placeholder="0" class="flex-1 bg-surface-container-high border border-primary/20 rounded-lg px-3 py-2 text-on-surface text-sm outline-none focus:border-primary transition-colors" value="${total>0?(total/(finSelMembers.size+1)).toFixed(0):''}"/>`;
+  [me,...Array.from(finSelMembers)].forEach(i=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;';
+    row.innerHTML=`<span style="font-size:13px;color:rgba(230,212,168,.5);width:72px;flex-shrink:0;">${MEMBERS[i]}${i===me?' (you)':''}</span><input id="ca-${i}" type="number" inputmode="decimal" placeholder="0" class="fin-input" style="flex:1;padding:10px 12px;" value="${total>0?(total/(finSelMembers.size+1)).toFixed(0):''}"/>`;
     wrap.appendChild(row);
   });
 }
-
 async function submitExpense(){
   const item=document.getElementById('finItem').value.trim();
   const total=parseFloat(document.getElementById('finAmount').value);
   if(!item){showToast('Enter an item name','gold');return;}
   if(!total||total<=0){showToast('Enter a valid amount','gold');return;}
   if(finSelMembers.size===0){showToast('Select who to split with','gold');return;}
-
   const allPeople=[me,...Array.from(finSelMembers)];
   const splits={};
-
   if(splitType==='even'){
     const share=total/allPeople.length;
     allPeople.forEach(i=>{splits[i]={amount:parseFloat(share.toFixed(2)),paid:i===me};});
   } else {
     let sum=0;
-    allPeople.forEach(i=>{
-      const v=parseFloat(document.getElementById(`ca-${i}`)?.value||0);
-      splits[i]={amount:v,paid:i===me};
-      sum+=v;
-    });
+    allPeople.forEach(i=>{const v=parseFloat(document.getElementById(`ca-${i}`)?.value||0);splits[i]={amount:v,paid:i===me};sum+=v;});
     if(Math.abs(sum-total)>1){showToast(`Amounts must sum to ${total} EGP`,'gold');return;}
   }
-
-  const expId='exp_'+Date.now();
-  await write(`finances/${expId}`,{item,total,paidBy:me,splits,ts:Date.now()});
-  closeFinModal();showToast(`${item} logged — ${total} EGP`,'green');
+  await write(`finances/exp_${Date.now()}`,{item,total,paidBy:me,splits,ts:Date.now()});
+  closeFinModal();showToast(`${item} — ${total} EGP logged`,'green');
 }
-
 async function markPaid(expId,memberIdx){
   const exp=finances[expId];if(!exp)return;
   if(exp.paidBy!==me){showToast('Only the payer can mark this','');return;}
