@@ -100,8 +100,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink-900);color:var(--text
 .hub-date-full{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-top:3px;}
 
 /* Zone cards */
-.zones{position:relative;width:100%;max-width:340px;height:310px;margin:0 auto;}
-.zcard{position:absolute;background:rgba(22,18,28,.82);border:1px solid rgba(212,184,122,.1);border-radius:18px;padding:14px 16px;cursor:pointer;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);transition:box-shadow .3s,border-color .3s;will-change:transform;}
+.zones{position:relative;width:min(86vw,296px);height:min(86vw,296px);margin:0 auto;border-radius:50%;background:rgba(28,22,38,.55);border:1px solid rgba(212,184,122,.08);box-shadow:0 0 60px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.04);overflow:visible;}
+.zcard{position:absolute;background:rgba(22,18,28,.82);border:1px solid rgba(212,184,122,.1);border-radius:16px;padding:11px 13px;cursor:pointer;backdrop-filter:blur(16px);box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);transition:box-shadow .3s,border-color .3s;will-change:transform;width:110px;min-height:80px;}
 /* Individual float per card */
 .zcard:nth-child(1){animation:flt1 7s ease-in-out infinite;}
 .zcard:nth-child(2){animation:flt2 9s ease-in-out infinite;}
@@ -120,11 +120,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--ink-900);color:var(--text
 @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
 .zcard:active{transform:scale(.94)!important;animation-play-state:paused;}
 
-.zc-bc{top:0;left:50%;transform:translateX(-50%);width:150px;}
-.zc-arr{top:42%;left:0;width:138px;}
-.zc-pan{top:42%;right:0;width:138px;}
-.zc-lb{bottom:0;left:8%;width:128px;}
-.zc-fin{bottom:0;right:8%;width:128px;}
+/* Positions set by JS positionZones() */
 
 .zi{font-size:20px;margin-bottom:5px;line-height:1;}
 .zn{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--sand-200);letter-spacing:.5px;}
@@ -721,6 +717,39 @@ function doLogout(){
 }
 
 /* ═══ ENTER APP ═══ */
+function positionZones(){
+  const wrap=document.getElementById('zonesWrap');
+  if(!wrap)return;
+  const size=wrap.offsetWidth||Math.min(window.innerWidth*.88,300);
+  const cx=size/2,cy=size/2;
+  const R=size*.34;// radius of card centers from middle
+  const cards=[
+    {id:'zc-broadcasts',  angle:-90},  // top
+    {id:'zc-arrivals',    angle:-90+72},// top-right
+    {id:'zc-pantry',      angle:-90+144},// bottom-right
+    {id:'zc-finance',     angle:-90+216},// bottom-left
+    {id:'zc-leaderboard', angle:-90+288},// top-left... wait — reorder for visual balance
+  ];
+  // Pentagon: Broadcasts top, then clockwise: Arrivals, Pantry, Finance, Leaderboard
+  const order=[
+    {id:'zc-broadcasts',  a:-90},
+    {id:'zc-arrivals',    a:-90+72},
+    {id:'zc-pantry',      a:-90+144},
+    {id:'zc-finance',     a:-90+216},
+    {id:'zc-leaderboard', a:-90+288},
+  ];
+  order.forEach(({id,a})=>{
+    const el=document.getElementById(id);if(!el)return;
+    const rad=a*Math.PI/180;
+    const x=cx+R*Math.cos(rad);
+    const y=cy+R*Math.sin(rad);
+    const w=el.offsetWidth||130;
+    const h=el.offsetHeight||70;
+    el.style.left=(x-w/2)+'px';
+    el.style.top=(y-h/2)+'px';
+  });
+}
+
 function enterApp(){
   const init=MEMBERS[me].slice(0,2).toUpperCase();
   ['hubAv','arrAv','panAv'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=init;});
@@ -729,6 +758,9 @@ function enterApp(){
   document.getElementById('hubFull').textContent=now.getFullYear().toString();
   document.getElementById('bnav').style.display='flex';
   showPg('hubPg');setNB('hub');
+  // Position zones after a tick so elements have rendered
+  setTimeout(positionZones,50);
+  window.addEventListener('resize',positionZones);
   subscribe();
 }
 
